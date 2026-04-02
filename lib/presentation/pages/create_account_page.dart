@@ -1,19 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../core/master_account_service.dart';
-import '../../data/vault_repository.dart';
-import '../../domain/models/vault.dart';
+import '../../domain/usecases/account_usecases.dart';
 import '../widgets/backup_codes_dialog.dart';
+import '../state/account_scope.dart';
 
 class CreateAccountPage extends StatefulWidget {
-  const CreateAccountPage({
-    required this.accountService,
-    required this.vaultRepository,
-    super.key,
-  });
-
-  final MasterAccountService accountService;
-  final VaultRepository vaultRepository;
+  const CreateAccountPage({super.key});
 
   @override
   State<CreateAccountPage> createState() => _CreateAccountPageState();
@@ -23,6 +15,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _tokenController = TextEditingController();
   bool _isSubmitting = false;
 
   @override
@@ -30,6 +23,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     _usernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _tokenController.dispose();
     super.dispose();
   }
 
@@ -50,15 +44,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     });
 
     try {
-      final session = await widget.accountService.createAccount(
+      final backupCodes = await AccountScope.of(context).createAccount(
         username: username,
         password: password,
-      );
-
-      await widget.vaultRepository.save(
-        session.account.username,
-        session.vaultKey,
-        Vault.empty(),
+        authToken: _tokenController.text,
       );
 
       if (!mounted) {
@@ -67,7 +56,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
       await showBackupCodesDialog(
         context,
-        backupCodes: session.backupCodes,
+        backupCodes: backupCodes,
         title: 'Backup Codes',
       );
 
@@ -75,8 +64,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         return;
       }
 
-      Navigator.pop(context, session);
-    } on AuthException catch (error) {
+      Navigator.pop(context);
+    } on AccountException catch (error) {
       if (!mounted) {
         return;
       }
@@ -112,7 +101,14 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         children: [
           TextField(
             controller: _usernameController,
-            decoration: const InputDecoration(labelText: 'Username'),
+            decoration: const InputDecoration(labelText: 'Email or Username'),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _tokenController,
+            decoration: const InputDecoration(
+              labelText: 'Token or API Key (Optional)',
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
@@ -132,7 +128,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
           const SizedBox(height: 24),
           FilledButton(
             onPressed: _isSubmitting ? null : _createAccount,
-            child: Text(_isSubmitting ? 'Creating...' : 'Create Account'),
+            child: Text(_isSubmitting ? 'Adding...' : 'Add Account'),
           ),
         ],
       ),

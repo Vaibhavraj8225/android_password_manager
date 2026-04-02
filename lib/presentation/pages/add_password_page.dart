@@ -1,21 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../data/vault_repository.dart';
 import '../../domain/models/vault.dart';
+import '../state/account_scope.dart';
 
 class AddPasswordPage extends StatefulWidget {
-  final Vault vault;
-  final VaultRepository repository;
-  final List<int> encryptionKey;
-  final String username;
-
-  const AddPasswordPage({
-    required this.vault,
-    required this.repository,
-    required this.encryptionKey,
-    required this.username,
-    super.key,
-  });
+  const AddPasswordPage({super.key});
 
   @override
   State<AddPasswordPage> createState() => _AddPasswordPageState();
@@ -51,7 +40,8 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
       _isSaving = true;
     });
 
-    final updatedEntries = List<Map<String, dynamic>>.from(widget.vault.entries)
+    final controller = AccountScope.of(context);
+    final updatedEntries = List<Map<String, dynamic>>.from(controller.currentVault.entries)
       ..add({
         'app': app,
         'username': username,
@@ -60,15 +50,11 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
 
     final updatedVault = Vault(
       entries: updatedEntries,
-      notes: List<Map<String, dynamic>>.from(widget.vault.notes),
+      notes: List<Map<String, dynamic>>.from(controller.currentVault.notes),
     );
 
     try {
-      await widget.repository.save(
-        widget.username,
-        widget.encryptionKey,
-        updatedVault,
-      );
+      await controller.saveVault(updatedVault);
 
       if (!mounted) {
         return;

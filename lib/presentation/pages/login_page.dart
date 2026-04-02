@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../core/crypto_service.dart';
-import '../../core/key_derivation.dart';
-import '../../core/master_account_service.dart';
-import '../../core/storage_service.dart';
-import '../../data/vault_repository.dart';
-import 'create_account_page.dart';
-import 'home_page.dart';
+import '../../domain/entities/account_entity.dart';
+import '../../domain/usecases/account_usecases.dart';
+import '../state/account_scope.dart';
 import 'reset_password_page.dart';
+import 'create_account_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,27 +16,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  late final StorageService _storageService;
-  late final VaultRepository _vaultRepository;
-  late final MasterAccountService _accountService;
-  bool _isLoading = true;
-  bool _isUnlocking = false;
-  bool _hasAccount = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _storageService = StorageService();
-    _vaultRepository = VaultRepository(
-      CryptoService(),
-      _storageService,
-    );
-    _accountService = MasterAccountService(
-      _storageService,
-      KeyDerivation(),
-    );
-    _loadAccountState();
-  }
 
   @override
   void dispose() {
@@ -48,57 +24,15 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  Future<void> _loadAccountState() async {
-    final account = await _accountService.loadAccount();
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _hasAccount = account != null;
-      _isLoading = false;
-      if (account != null) {
-        _usernameController.text = account.username;
-      } else {
-        _usernameController.clear();
-      }
-    });
-  }
-
   Future<void> _unlockVault() async {
-    setState(() {
-      _isUnlocking = true;
-    });
-
+    final controller = AccountScope.of(context);
     try {
-      final session = await _accountService.authenticate(
+      await controller.unlockActiveAccount(
         username: _usernameController.text,
         password: _passwordController.text,
       );
-
-      final vault = await _vaultRepository.load(
-        session.account.username,
-        session.vaultKey,
-      );
-
-      if (!mounted) {
-        return;
-      }
-
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => HomePage(
-            initialVault: vault,
-            repository: _vaultRepository,
-            encryptionKey: session.vaultKey,
-            username: session.account.username,
-            accountService: _accountService,
-          ),
-        ),
-      );
-    } on AuthException catch (error) {
+      _passwordController.clear();
+    } on AccountException catch (error) {
       if (!mounted) {
         return;
       }
@@ -114,57 +48,14 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Unable to unlock vault.')),
       );
-    } finally {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _isUnlocking = false;
-      });
     }
   }
 
   Future<void> _openCreateAccount() async {
-    final session = await Navigator.push(
+    await Navigator.push<void>(
       context,
       MaterialPageRoute(
-        builder: (_) => CreateAccountPage(
-          accountService: _accountService,
-          vaultRepository: _vaultRepository,
-        ),
-      ),
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    await _loadAccountState();
-
-    if (session is! AccountSession) {
-      return;
-    }
-
-    final vault = await _vaultRepository.load(
-      session.account.username,
-      session.vaultKey,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => HomePage(
-          initialVault: vault,
-          repository: _vaultRepository,
-          encryptionKey: session.vaultKey,
-          username: session.account.username,
-          accountService: _accountService,
-        ),
+        builder: (_) => const CreateAccountPage(),
       ),
     );
   }
@@ -173,9 +64,7 @@ class _LoginPageState extends State<LoginPage> {
     final wasReset = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (_) => ResetPasswordPage(
-          accountService: _accountService,
-        ),
+        builder: (_) => const ResetPasswordPage(),
       ),
     );
 
@@ -189,12 +78,144 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  Future<void> _switchAccount(AccountEntity account) async {
+    final controller = AccountScope.of(context);
+    try {
+      await controller.switchToAccount(account.id);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _usernameController.text = account.username;
+        _passwordController.clear();
+      });
+    } on AccountException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+    }
+  }
+
+  Future<void> _deleteAccount(AccountEntity account) async {
+    final password = await _promptDeletePassword(account);
+    if (password == null || !mounted) {
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete account?'),
+        content: Text(
+          'Remove ${account.username} from this device and delete its local vault data?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) {
+      return;
+    }
+
+    final controller = AccountScope.of(context);
+    try {
+      await controller.deleteSavedAccount(
+        accountId: account.id,
+        password: password,
+      );
+      if (!mounted) {
+        return;
+      }
+
+      final activeUsername = controller.activeAccount?.username ?? '';
+      setState(() {
+        _usernameController.text = activeUsername;
+        _passwordController.clear();
+      });
+    } on AccountException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+    }
+  }
+
+  Future<String?> _promptDeletePassword(AccountEntity account) async {
+    final passwordController = TextEditingController();
+    var obscureText = true;
+
+    final password = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            title: const Text('Confirm master password'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Enter the master password for ${account.username}.'),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: passwordController,
+                  obscureText: obscureText,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    labelText: 'Master Password',
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          obscureText = !obscureText;
+                        });
+                      },
+                      icon: Icon(
+                        obscureText ? Icons.visibility : Icons.visibility_off,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, passwordController.text),
+                child: const Text('Continue'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    passwordController.dispose();
+    return password;
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+    final controller = AccountScope.of(context);
+    final active = controller.activeAccount;
+    if (_usernameController.text.isEmpty && active != null) {
+      _usernameController.text = active.username;
     }
 
     return Scaffold(
@@ -202,10 +223,45 @@ class _LoginPageState extends State<LoginPage> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          if (_hasAccount) ...[
+          if (controller.errorMessage != null) ...[
+            Card(
+              color: Colors.red.withOpacity(0.18),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(controller.errorMessage!),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+          Text(
+            controller.hasAccounts
+                ? 'Saved accounts on this device'
+                : 'Create your first master account to secure the vault and generate one-time backup codes.',
+          ),
+          const SizedBox(height: 16),
+          if (controller.hasAccounts) ...[
+            for (final account in controller.accounts)
+              Card(
+                child: ListTile(
+                  leading: CircleAvatar(
+                    child: Text(_initialFor(account.username)),
+                  ),
+                  title: Text(account.username),
+                  subtitle: Text(
+                    account.id == active?.id ? 'Active account' : 'Tap to switch',
+                  ),
+                  onTap: controller.isBusy ? null : () => _switchAccount(account),
+                  trailing: IconButton(
+                    onPressed: controller.isBusy ? null : () => _deleteAccount(account),
+                    icon: const Icon(Icons.delete_outline),
+                    tooltip: 'Delete account',
+                  ),
+                ),
+              ),
+            const SizedBox(height: 12),
             TextField(
               controller: _usernameController,
-              decoration: const InputDecoration(labelText: 'Username'),
+              decoration: const InputDecoration(labelText: 'Email or Username'),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -215,8 +271,8 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 20),
             FilledButton(
-              onPressed: _isUnlocking ? null : _unlockVault,
-              child: Text(_isUnlocking ? 'Unlocking...' : 'Unlock Vault'),
+              onPressed: controller.isBusy ? null : _unlockVault,
+              child: Text(controller.isBusy ? 'Unlocking...' : 'Unlock Vault'),
             ),
             const SizedBox(height: 12),
             TextButton(
@@ -224,19 +280,26 @@ class _LoginPageState extends State<LoginPage> {
               child: const Text('Forgot password? Use a backup code'),
             ),
           ] else ...[
-            const Padding(
-              padding: EdgeInsets.only(bottom: 20),
-              child: Text(
-                'Create your master account to secure the vault and receive one-time backup codes for recovery.',
-              ),
-            ),
             FilledButton(
               onPressed: _openCreateAccount,
               child: const Text('Create Master Account'),
             ),
           ],
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: controller.isBusy ? null : _openCreateAccount,
+            child: Text(controller.hasAccounts ? 'Add Another Account' : 'Add Account'),
+          ),
         ],
       ),
     );
+  }
+
+  String _initialFor(String username) {
+    final normalized = username.trim();
+    if (normalized.isEmpty) {
+      return '?';
+    }
+    return normalized.substring(0, 1).toUpperCase();
   }
 }

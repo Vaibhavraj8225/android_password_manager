@@ -2,8 +2,6 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../domain/models/master_account.dart';
-
 class StorageService {
   Future<void> saveVault(String masterId, List<int> encrypted) async {
     final prefs = await SharedPreferences.getInstance();
@@ -22,23 +20,31 @@ class StorageService {
     return base64Decode(encoded);
   }
 
-  Future<void> saveMasterAccount(MasterAccount account) async {
+  Future<void> deleteVault(String masterId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_masterAccountKey, jsonEncode(account.toJson()));
+    await prefs.remove(_vaultKey(masterId));
   }
 
-  Future<MasterAccount?> loadMasterAccount() async {
+  Future<void> saveLegacyMasterAccountJson(Map<String, dynamic> json) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_masterAccountKey);
+    await prefs.setString(_legacyMasterAccountKey, jsonEncode(json));
+  }
+
+  Future<Map<String, dynamic>?> loadLegacyMasterAccountJson() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_legacyMasterAccountKey);
     if (raw == null || raw.isEmpty) {
       return null;
     }
 
-    return MasterAccount.fromJson(
-      Map<String, dynamic>.from(jsonDecode(raw) as Map),
-    );
+    return Map<String, dynamic>.from(jsonDecode(raw) as Map);
+  }
+
+  Future<void> clearLegacyMasterAccount() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_legacyMasterAccountKey);
   }
 
   String _vaultKey(String masterId) => 'vault_$masterId';
-  static const String _masterAccountKey = 'master_account';
+  static const String _legacyMasterAccountKey = 'master_account';
 }

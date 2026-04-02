@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../core/master_account_service.dart';
+import '../../domain/usecases/account_usecases.dart';
+import '../state/account_scope.dart';
 import '../widgets/backup_codes_dialog.dart';
 
 class ResetPasswordPage extends StatefulWidget {
-  const ResetPasswordPage({
-    required this.accountService,
-    super.key,
-  });
-
-  final MasterAccountService accountService;
+  const ResetPasswordPage({super.key});
 
   @override
   State<ResetPasswordPage> createState() => _ResetPasswordPageState();
@@ -44,7 +40,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     });
 
     try {
-      final backupCodes = await widget.accountService.resetPasswordWithBackupCode(
+      final backupCodes =
+          await AccountScope.of(context).resetPasswordWithBackupCode(
         username: _usernameController.text,
         backupCode: _backupCodeController.text,
         newPassword: _newPasswordController.text,
@@ -65,7 +62,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       }
 
       Navigator.pop(context, true);
-    } on AuthException catch (error) {
+    } on AccountException catch (error) {
       if (!mounted) {
         return;
       }
