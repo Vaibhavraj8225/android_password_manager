@@ -157,10 +157,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<String?> _promptDeletePassword(AccountEntity account) async {
-    final passwordController = TextEditingController();
     var obscureText = true;
+    var password = '';
 
-    final password = await showDialog<String>(
+    return showDialog<String>(
       context: context,
       builder: (context) {
         return StatefulBuilder(
@@ -172,9 +172,11 @@ class _LoginPageState extends State<LoginPage> {
                 Text('Enter the master password for ${account.username}.'),
                 const SizedBox(height: 12),
                 TextField(
-                  controller: passwordController,
                   obscureText: obscureText,
                   autofocus: true,
+                  onChanged: (value) {
+                    password = value;
+                  },
                   decoration: InputDecoration(
                     labelText: 'Master Password',
                     suffixIcon: IconButton(
@@ -197,7 +199,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: const Text('Cancel'),
               ),
               FilledButton(
-                onPressed: () => Navigator.pop(context, passwordController.text),
+                onPressed: () => Navigator.pop(context, password),
                 child: const Text('Continue'),
               ),
             ],
@@ -205,9 +207,6 @@ class _LoginPageState extends State<LoginPage> {
         );
       },
     );
-
-    passwordController.dispose();
-    return password;
   }
 
   @override
