@@ -15,6 +15,7 @@ class AccountController extends ChangeNotifier {
     required this.getActiveAccount,
     required this.addAccount,
     required this.switchAccount,
+    required this.logoutAccount,
     required this.deleteAccount,
     required this.authenticateAccount,
     required this.changeAccountPassword,
@@ -26,6 +27,7 @@ class AccountController extends ChangeNotifier {
   final GetActiveAccount getActiveAccount;
   final AddAccount addAccount;
   final SwitchAccount switchAccount;
+  final LogoutAccount logoutAccount;
   final DeleteAccount deleteAccount;
   final AuthenticateAccount authenticateAccount;
   final ChangeAccountPassword changeAccountPassword;
@@ -153,6 +155,24 @@ class AccountController extends ChangeNotifier {
           vaultOverride: vault,
           encryptionKey: key,
         );
+      } finally {
+        _setBusy(false);
+      }
+    });
+  }
+
+  Future<void> logout() {
+    return _runSerialized(() async {
+      _setBusy(true);
+      _clearError();
+      try {
+        await storageService.clearLegacyMasterAccount();
+        await logoutAccount();
+        _activeAccount = null;
+        _encryptionKey = null;
+        _currentVault = Vault.empty();
+        _accounts = await getAccounts();
+        notifyListeners();
       } finally {
         _setBusy(false);
       }
