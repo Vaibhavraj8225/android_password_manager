@@ -31,6 +31,30 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
+  Future<void> _logout() async {
+    final controller = AccountScope.of(context);
+    try {
+      await controller.logout();
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home',
+        (route) => false,
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to log out right now.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = AccountScope.of(context);
@@ -74,6 +98,11 @@ class _DashboardPageState extends State<DashboardPage> {
             onPressed: controller.isBusy ? null : _openChangePasswordPage,
             icon: const Icon(Icons.admin_panel_settings_outlined),
             tooltip: 'Change master password',
+          ),
+          IconButton(
+            onPressed: controller.isBusy ? null : _logout,
+            icon: const Icon(Icons.logout_rounded),
+            tooltip: 'Logout',
           ),
         ],
       ),
