@@ -285,6 +285,14 @@ class AuthenticateAccount {
   }
 }
 
+class LogoutAccount {
+  const LogoutAccount(this._repository);
+
+  final AccountRepository _repository;
+
+  Future<void> call() => _repository.setActiveAccount(null);
+}
+
 class ChangeAccountPassword {
   ChangeAccountPassword(
     this._repository,
