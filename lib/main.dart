@@ -29,6 +29,7 @@ void main() {
         getActiveAccount: GetActiveAccount(accountRepository),
         addAccount: addAccount,
         switchAccount: SwitchAccount(accountRepository),
+        logoutAccount: LogoutAccount(accountRepository),
         deleteAccount: DeleteAccount(accountRepository, keyDerivation),
         authenticateAccount: AuthenticateAccount(accountRepository, keyDerivation),
         changeAccountPassword: ChangeAccountPassword(
