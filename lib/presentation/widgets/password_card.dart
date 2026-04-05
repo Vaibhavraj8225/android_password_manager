@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 
 class PasswordCard extends StatefulWidget {
-  const PasswordCard(this.entry, {super.key});
+  const PasswordCard(
+    this.entry, {
+    required this.onDelete,
+    this.isDeleting = false,
+    super.key,
+  });
 
   final Map<String, dynamic> entry;
+  final VoidCallback? onDelete;
+  final bool isDeleting;
 
   @override
   State<PasswordCard> createState() => _PasswordCardState();
@@ -46,6 +53,11 @@ class _PasswordCardState extends State<PasswordCard> {
                         : Icons.visibility_off_outlined,
                   ),
                   tooltip: _isPasswordVisible ? 'Hide password' : 'Show password',
+                ),
+                IconButton(
+                  onPressed: widget.isDeleting ? null : widget.onDelete,
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: 'Delete credential',
                 ),
               ],
             ),
