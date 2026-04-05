@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/models/vault.dart';
 import '../state/account_scope.dart';
 import '../widgets/password_card.dart';
 import 'add_password_page.dart';
@@ -13,6 +14,8 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  int? _deletingIndex;
+
   Future<void> _openAddPasswordPage() async {
     await Navigator.push<void>(
       context,
@@ -52,6 +55,76 @@ class _DashboardPageState extends State<DashboardPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Unable to log out right now.')),
       );
+    }
+  }
+
+  Future<void> _deleteCredential(int index) async {
+    final controller = AccountScope.of(context);
+    final entry = controller.currentVault.entries[index];
+    final appName = entry['app']?.toString().trim();
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Credential'),
+          content: Text(
+            'Delete ${appName == null || appName.isEmpty ? 'this credential' : 'the credential for $appName'}?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete != true || !mounted) {
+      return;
+    }
+
+    setState(() {
+      _deletingIndex = index;
+    });
+
+    final updatedEntries =
+        List<Map<String, dynamic>>.from(controller.currentVault.entries)
+          ..removeAt(index);
+
+    try {
+      await controller.saveVault(
+        Vault(
+          entries: updatedEntries,
+          notes: List<Map<String, dynamic>>.from(controller.currentVault.notes),
+        ),
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Credential deleted.')),
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not delete credential.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _deletingIndex = null;
+        });
+      }
     }
   }
 
@@ -118,7 +191,11 @@ class _DashboardPageState extends State<DashboardPage> {
               itemCount: vault.entries.length,
               itemBuilder: (_, i) {
                 final entry = vault.entries[i];
-                return PasswordCard(entry);
+                return PasswordCard(
+                  entry,
+                  onDelete: () => _deleteCredential(i),
+                  isDeleting: _deletingIndex == i,
+                );
               },
             ),
     );
