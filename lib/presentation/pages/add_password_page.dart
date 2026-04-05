@@ -12,6 +12,7 @@ class AddPasswordPage extends StatefulWidget {
 
 class _AddPasswordPageState extends State<AddPasswordPage> {
   final TextEditingController _appController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isSaving = false;
@@ -20,6 +21,7 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
   @override
   void dispose() {
     _appController.dispose();
+    _emailController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -27,6 +29,7 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
 
   Future<void> _save() async {
     final app = _appController.text.trim();
+    final email = _emailController.text.trim();
     final username = _usernameController.text.trim();
     final password = _passwordController.text;
 
@@ -45,6 +48,7 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
     final updatedEntries = List<Map<String, dynamic>>.from(controller.currentVault.entries)
       ..add({
         'app': app,
+        'email': email,
         'username': username,
         'password': password,
       });
@@ -88,6 +92,11 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
             TextField(
               controller: _appController,
               decoration: const InputDecoration(labelText: 'App'),
+            ),
+            TextField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
             TextField(
               controller: _usernameController,
