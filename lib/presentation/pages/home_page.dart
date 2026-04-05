@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/usecases/account_usecases.dart';
 import '../state/account_scope.dart';
+import 'reset_password_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,6 +14,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isPasswordObscured = true;
 
   @override
   void dispose() {
@@ -54,6 +56,24 @@ class _HomePageState extends State<HomePage> {
 
   void _openRegisterPage() {
     Navigator.pushNamed(context, '/register');
+  }
+
+  Future<void> _openResetPassword() async {
+    final wasReset = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ResetPasswordPage(),
+      ),
+    );
+
+    if (!mounted || wasReset != true) {
+      return;
+    }
+
+    _passwordController.clear();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Password reset complete. Sign in again.')),
+    );
   }
 
   @override
@@ -98,15 +118,33 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 12),
               TextField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: _isPasswordObscured,
+                decoration: InputDecoration(
                   labelText: 'Password',
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordObscured = !_isPasswordObscured;
+                      });
+                    },
+                    icon: Icon(
+                      _isPasswordObscured
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                    ),
+                    tooltip: _isPasswordObscured ? 'Show password' : 'Hide password',
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
               FilledButton(
                 onPressed: controller.isBusy ? null : _unlockVault,
                 child: Text(controller.isBusy ? 'Signing In...' : 'Login'),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: controller.isBusy ? null : _openResetPassword,
+                child: const Text('Forgot password? Recover with backup code'),
               ),
               const SizedBox(height: 12),
               OutlinedButton(

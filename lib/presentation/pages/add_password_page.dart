@@ -15,6 +15,7 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isSaving = false;
+  bool _isPasswordObscured = true;
 
   @override
   void dispose() {
@@ -94,8 +95,23 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
             ),
             TextField(
               controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: _isPasswordObscured,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordObscured = !_isPasswordObscured;
+                    });
+                  },
+                  icon: Icon(
+                    _isPasswordObscured
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                  ),
+                  tooltip: _isPasswordObscured ? 'Show password' : 'Hide password',
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             SizedBox(

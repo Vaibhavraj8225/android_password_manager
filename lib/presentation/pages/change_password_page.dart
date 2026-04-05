@@ -16,6 +16,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   bool _isSubmitting = false;
+  bool _isCurrentPasswordObscured = true;
+  bool _isNewPasswordObscured = true;
+  bool _isConfirmPasswordObscured = true;
 
   @override
   void dispose() {
@@ -94,20 +97,69 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         children: [
           TextField(
             controller: _currentPasswordController,
-            obscureText: true,
-            decoration: const InputDecoration(labelText: 'Current Password'),
+            obscureText: _isCurrentPasswordObscured,
+            decoration: InputDecoration(
+              labelText: 'Current Password',
+              suffixIcon: IconButton(
+                onPressed: () {
+                  setState(() {
+                    _isCurrentPasswordObscured = !_isCurrentPasswordObscured;
+                  });
+                },
+                icon: Icon(
+                  _isCurrentPasswordObscured
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                ),
+                tooltip: _isCurrentPasswordObscured
+                    ? 'Show password'
+                    : 'Hide password',
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _newPasswordController,
-            obscureText: true,
-            decoration: const InputDecoration(labelText: 'New Password'),
+            obscureText: _isNewPasswordObscured,
+            decoration: InputDecoration(
+              labelText: 'New Password',
+              suffixIcon: IconButton(
+                onPressed: () {
+                  setState(() {
+                    _isNewPasswordObscured = !_isNewPasswordObscured;
+                  });
+                },
+                icon: Icon(
+                  _isNewPasswordObscured
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                ),
+                tooltip: _isNewPasswordObscured ? 'Show password' : 'Hide password',
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _confirmPasswordController,
-            obscureText: true,
-            decoration: const InputDecoration(labelText: 'Confirm New Password'),
+            obscureText: _isConfirmPasswordObscured,
+            decoration: InputDecoration(
+              labelText: 'Confirm New Password',
+              suffixIcon: IconButton(
+                onPressed: () {
+                  setState(() {
+                    _isConfirmPasswordObscured = !_isConfirmPasswordObscured;
+                  });
+                },
+                icon: Icon(
+                  _isConfirmPasswordObscured
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                ),
+                tooltip: _isConfirmPasswordObscured
+                    ? 'Show password'
+                    : 'Hide password',
+              ),
+            ),
           ),
           const SizedBox(height: 24),
           FilledButton(

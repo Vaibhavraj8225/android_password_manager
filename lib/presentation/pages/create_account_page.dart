@@ -17,6 +17,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _tokenController = TextEditingController();
   bool _isSubmitting = false;
+  bool _isPasswordObscured = true;
+  bool _isConfirmPasswordObscured = true;
 
   @override
   void dispose() {
@@ -113,17 +115,47 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
           const SizedBox(height: 12),
           TextField(
             controller: _passwordController,
-            obscureText: true,
-            decoration: const InputDecoration(
+            obscureText: _isPasswordObscured,
+            decoration: InputDecoration(
               labelText: 'Password',
               helperText: 'Use 8+ chars with uppercase, lowercase, and number.',
+              suffixIcon: IconButton(
+                onPressed: () {
+                  setState(() {
+                    _isPasswordObscured = !_isPasswordObscured;
+                  });
+                },
+                icon: Icon(
+                  _isPasswordObscured
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                ),
+                tooltip: _isPasswordObscured ? 'Show password' : 'Hide password',
+              ),
             ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _confirmPasswordController,
-            obscureText: true,
-            decoration: const InputDecoration(labelText: 'Confirm Password'),
+            obscureText: _isConfirmPasswordObscured,
+            decoration: InputDecoration(
+              labelText: 'Confirm Password',
+              suffixIcon: IconButton(
+                onPressed: () {
+                  setState(() {
+                    _isConfirmPasswordObscured = !_isConfirmPasswordObscured;
+                  });
+                },
+                icon: Icon(
+                  _isConfirmPasswordObscured
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                ),
+                tooltip: _isConfirmPasswordObscured
+                    ? 'Show password'
+                    : 'Hide password',
+              ),
+            ),
           ),
           const SizedBox(height: 24),
           FilledButton(
