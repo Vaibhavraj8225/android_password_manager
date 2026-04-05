@@ -15,6 +15,15 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int? _deletingIndex;
+  final TextEditingController _deleteAccountPasswordController =
+      TextEditingController();
+  bool _isDeleteAccountPasswordObscured = true;
+
+  @override
+  void dispose() {
+    _deleteAccountPasswordController.dispose();
+    super.dispose();
+  }
 
   Future<void> _openAddPasswordPage() async {
     await Navigator.push<void>(
@@ -128,6 +137,119 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  Future<void> _deleteMasterAccount() async {
+    final controller = AccountScope.of(context);
+    final activeAccount = controller.activeAccount;
+    if (activeAccount == null) {
+      return;
+    }
+
+    _deleteAccountPasswordController.clear();
+    _isDeleteAccountPasswordObscured = true;
+
+    final password = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Delete Master Account'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'This permanently deletes ${activeAccount.username} and destroys every credential stored inside this vault.',
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _deleteAccountPasswordController,
+                      obscureText: _isDeleteAccountPasswordObscured,
+                      decoration: InputDecoration(
+                        labelText: 'Master Password',
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setDialogState(() {
+                              _isDeleteAccountPasswordObscured =
+                                  !_isDeleteAccountPasswordObscured;
+                            });
+                          },
+                          icon: Icon(
+                            _isDeleteAccountPasswordObscured
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                          ),
+                          tooltip: _isDeleteAccountPasswordObscured
+                              ? 'Show password'
+                              : 'Hide password',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(
+                    context,
+                    _deleteAccountPasswordController.text,
+                  ),
+                  child: const Text('Delete Account'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (!mounted || password == null) {
+      return;
+    }
+
+    try {
+      final messenger = ScaffoldMessenger.of(context);
+      await controller.deleteSavedAccount(
+        accountId: activeAccount.id,
+        password: password,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (controller.activeAccount == null) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/home',
+          (route) => false,
+        );
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Master account deleted.')),
+        );
+        return;
+      }
+
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Master account deleted. Switched to another saved account.')),
+      );
+    } on Exception {
+      if (!mounted) {
+        return;
+      }
+
+      final message = controller.errorMessage ?? 'Could not delete master account.';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = AccountScope.of(context);
@@ -176,6 +298,11 @@ class _DashboardPageState extends State<DashboardPage> {
             onPressed: controller.isBusy ? null : _logout,
             icon: const Icon(Icons.logout_rounded),
             tooltip: 'Logout',
+          ),
+          IconButton(
+            onPressed: controller.isBusy ? null : _deleteMasterAccount,
+            icon: const Icon(Icons.delete_forever_outlined),
+            tooltip: 'Delete master account',
           ),
         ],
       ),
