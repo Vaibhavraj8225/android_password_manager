@@ -15,6 +15,7 @@ class _PasswordCardState extends State<PasswordCard> {
   @override
   Widget build(BuildContext context) {
     final appName = widget.entry['app']?.toString() ?? '';
+    final email = widget.entry['email']?.toString() ?? '';
     final username = widget.entry['username']?.toString() ?? '';
     final password = widget.entry['password']?.toString() ?? '';
 
@@ -47,6 +48,16 @@ class _PasswordCardState extends State<PasswordCard> {
                   tooltip: _isPasswordVisible ? 'Hide password' : 'Show password',
                 ),
               ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Email',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+            const SizedBox(height: 4),
+            SelectableText(
+              email.isEmpty ? 'No email saved' : email,
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 12),
             Text(
