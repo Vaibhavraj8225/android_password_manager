@@ -67,6 +67,53 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  Future<void> _openAccountMenu() async {
+    final controller = AccountScope.of(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.admin_panel_settings_outlined),
+                title: const Text('Change Master Password'),
+                onTap: controller.isBusy
+                    ? null
+                    : () {
+                        Navigator.pop(sheetContext);
+                        _openChangePasswordPage();
+                      },
+              ),
+              ListTile(
+                leading: const Icon(Icons.logout_rounded),
+                title: const Text('Logout'),
+                onTap: controller.isBusy
+                    ? null
+                    : () {
+                        Navigator.pop(sheetContext);
+                        _logout();
+                      },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete_forever_outlined),
+                title: const Text('Delete Master Account'),
+                textColor: Theme.of(context).colorScheme.error,
+                iconColor: Theme.of(context).colorScheme.error,
+                onTap: controller.isBusy
+                    ? null
+                    : () {
+                        Navigator.pop(sheetContext);
+                        _deleteMasterAccount();
+                      },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _deleteCredential(int index) async {
     final controller = AccountScope.of(context);
     final entry = controller.currentVault.entries[index];
@@ -218,25 +265,19 @@ class _DashboardPageState extends State<DashboardPage> {
         accountId: activeAccount.id,
         password: password,
       );
+      await controller.logout();
 
       if (!mounted) {
         return;
       }
 
-      if (controller.activeAccount == null) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/home',
-          (route) => false,
-        );
-        messenger.showSnackBar(
-          const SnackBar(content: Text('Master account deleted.')),
-        );
-        return;
-      }
-
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home',
+        (route) => false,
+      );
       messenger.showSnackBar(
-        const SnackBar(content: Text('Master account deleted. Switched to another saved account.')),
+        const SnackBar(content: Text('Master account deleted.')),
       );
     } on Exception {
       if (!mounted) {
@@ -287,24 +328,12 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: controller.isBusy ? null : _openAccountMenu,
+          icon: const Icon(Icons.menu),
+          tooltip: 'Account options',
+        ),
         title: Text('Vault: $username'),
-        actions: [
-          IconButton(
-            onPressed: controller.isBusy ? null : _openChangePasswordPage,
-            icon: const Icon(Icons.admin_panel_settings_outlined),
-            tooltip: 'Change master password',
-          ),
-          IconButton(
-            onPressed: controller.isBusy ? null : _logout,
-            icon: const Icon(Icons.logout_rounded),
-            tooltip: 'Logout',
-          ),
-          IconButton(
-            onPressed: controller.isBusy ? null : _deleteMasterAccount,
-            icon: const Icon(Icons.delete_forever_outlined),
-            tooltip: 'Delete master account',
-          ),
-        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: controller.isBusy ? null : _openAddPasswordPage,
