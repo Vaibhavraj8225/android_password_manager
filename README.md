@@ -1,5 +1,5 @@
 # pass_manager
-
+This is  password manager android application where you can store your credentials.
 A new Flutter project.
 
 ## Getting Started
