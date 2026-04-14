@@ -79,13 +79,17 @@ class AccountRepositoryImpl implements AccountRepository {
     await _localDataSource.saveAccounts(
       accounts.where((account) => account.id != id).toList(),
     );
+<<<<<<< HEAD
     await _localDataSource.storeRecoveryRequest(id, null);
+=======
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
   }
 
   @override
   Future<void> setActiveAccount(String? id) {
     return _localDataSource.setActiveAccountId(id);
   }
+<<<<<<< HEAD
 
   @override
   Future<void> storeRecoveryKeyHash({
@@ -133,4 +137,6 @@ class AccountRepositoryImpl implements AccountRepository {
   Future<RecoveryRequestEntity?> getRecoveryRequest(String accountId) {
     return _localDataSource.getRecoveryRequest(accountId);
   }
+=======
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 }

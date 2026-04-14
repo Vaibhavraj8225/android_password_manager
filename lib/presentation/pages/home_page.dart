@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/usecases/account_usecases.dart';
+<<<<<<< HEAD
 import 'recovery_page.dart';
 import '../state/account_scope.dart';
+=======
+import '../state/account_scope.dart';
+import 'reset_password_page.dart';
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -40,17 +45,29 @@ class _HomePageState extends State<HomePage> {
         return;
       }
 
+<<<<<<< HEAD
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(error.message)));
+=======
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     } catch (_) {
       if (!mounted) {
         return;
       }
 
+<<<<<<< HEAD
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Unable to unlock vault.')));
+=======
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to unlock vault.')),
+      );
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     }
   }
 
@@ -58,10 +75,19 @@ class _HomePageState extends State<HomePage> {
     Navigator.pushNamed(context, '/register');
   }
 
+<<<<<<< HEAD
   Future<void> _openRecoveryFlow() async {
     final wasReset = await Navigator.push<bool>(
       context,
       MaterialPageRoute<bool>(builder: (_) => const RecoveryPage()),
+=======
+  Future<void> _openResetPassword() async {
+    final wasReset = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ResetPasswordPage(),
+      ),
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     );
 
     if (!mounted || wasReset != true) {
@@ -93,13 +119,21 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 8),
               Text(
+<<<<<<< HEAD
                 'Sign in to access your encrypted vault. Successful sign-ins automatically trust this device for future recovery.',
+=======
+                'Sign in to access your vault from the centralized authentication home.',
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 24),
               if (controller.errorMessage != null) ...[
                 Card(
+<<<<<<< HEAD
                   color: Colors.red.withValues(alpha: 0.18),
+=======
+                  color: Colors.red.withOpacity(0.18),
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Text(controller.errorMessage!),
@@ -130,9 +164,13 @@ class _HomePageState extends State<HomePage> {
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
                     ),
+<<<<<<< HEAD
                     tooltip: _isPasswordObscured
                         ? 'Show password'
                         : 'Hide password',
+=======
+                    tooltip: _isPasswordObscured ? 'Show password' : 'Hide password',
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
                   ),
                 ),
               ),
@@ -143,8 +181,13 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 12),
               TextButton(
+<<<<<<< HEAD
                 onPressed: controller.isBusy ? null : _openRecoveryFlow,
                 child: const Text('Forgot password? Recover with recovery key'),
+=======
+                onPressed: controller.isBusy ? null : _openResetPassword,
+                child: const Text('Forgot password? Recover with backup code'),
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
               ),
               const SizedBox(height: 12),
               OutlinedButton(

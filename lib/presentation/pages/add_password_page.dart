@@ -34,9 +34,15 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
     final password = _passwordController.text;
 
     if (app.isEmpty || username.isEmpty || password.isEmpty) {
+<<<<<<< HEAD
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Fill in all fields')));
+=======
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Fill in all fields')),
+      );
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
       return;
     }
 
@@ -45,6 +51,7 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
     });
 
     final controller = AccountScope.of(context);
+<<<<<<< HEAD
     final updatedEntries =
         List<Map<String, dynamic>>.from(controller.currentVault.entries)..add({
           'app': app,
@@ -52,6 +59,15 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
           'username': username,
           'password': password,
         });
+=======
+    final updatedEntries = List<Map<String, dynamic>>.from(controller.currentVault.entries)
+      ..add({
+        'app': app,
+        'email': email,
+        'username': username,
+        'password': password,
+      });
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 
     final updatedVault = Vault(
       entries: updatedEntries,
@@ -75,9 +91,15 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
         _isSaving = false;
       });
 
+<<<<<<< HEAD
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Could not save password')));
+=======
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not save password')),
+      );
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     }
   }
 
@@ -118,9 +140,13 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
                   ),
+<<<<<<< HEAD
                   tooltip: _isPasswordObscured
                       ? 'Show password'
                       : 'Hide password',
+=======
+                  tooltip: _isPasswordObscured ? 'Show password' : 'Hide password',
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
                 ),
               ),
             ),

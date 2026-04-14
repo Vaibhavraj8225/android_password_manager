@@ -5,8 +5,12 @@ class AccountEntity {
     required this.passwordSalt,
     required this.passwordHash,
     required this.vaultKey,
+<<<<<<< HEAD
     required this.recoveryKeySalt,
     required this.recoveryKeyHash,
+=======
+    required this.backupCodes,
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     this.authToken,
     this.createdAt,
     this.lastUsedAt,
@@ -17,8 +21,12 @@ class AccountEntity {
   final String passwordSalt;
   final String passwordHash;
   final String vaultKey;
+<<<<<<< HEAD
   final String recoveryKeySalt;
   final String recoveryKeyHash;
+=======
+  final List<BackupCodeEntity> backupCodes;
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
   final String? authToken;
   final DateTime? createdAt;
   final DateTime? lastUsedAt;
@@ -29,8 +37,12 @@ class AccountEntity {
     String? passwordSalt,
     String? passwordHash,
     String? vaultKey,
+<<<<<<< HEAD
     String? recoveryKeySalt,
     String? recoveryKeyHash,
+=======
+    List<BackupCodeEntity>? backupCodes,
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     String? authToken,
     DateTime? createdAt,
     DateTime? lastUsedAt,
@@ -41,8 +53,12 @@ class AccountEntity {
       passwordSalt: passwordSalt ?? this.passwordSalt,
       passwordHash: passwordHash ?? this.passwordHash,
       vaultKey: vaultKey ?? this.vaultKey,
+<<<<<<< HEAD
       recoveryKeySalt: recoveryKeySalt ?? this.recoveryKeySalt,
       recoveryKeyHash: recoveryKeyHash ?? this.recoveryKeyHash,
+=======
+      backupCodes: backupCodes ?? this.backupCodes,
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
       authToken: authToken ?? this.authToken,
       createdAt: createdAt ?? this.createdAt,
       lastUsedAt: lastUsedAt ?? this.lastUsedAt,
@@ -50,6 +66,7 @@ class AccountEntity {
   }
 }
 
+<<<<<<< HEAD
 class RecoveryRequestEntity {
   const RecoveryRequestEntity({
     required this.attemptCount,
@@ -104,6 +121,28 @@ class RecoveryRequestEntity {
       authorizationExpiresAt: clearAuthorizationExpiresAt
           ? null
           : authorizationExpiresAt ?? this.authorizationExpiresAt,
+=======
+class BackupCodeEntity {
+  const BackupCodeEntity({
+    required this.salt,
+    required this.hash,
+    required this.isUsed,
+  });
+
+  final String salt;
+  final String hash;
+  final bool isUsed;
+
+  BackupCodeEntity copyWith({
+    String? salt,
+    String? hash,
+    bool? isUsed,
+  }) {
+    return BackupCodeEntity(
+      salt: salt ?? this.salt,
+      hash: hash ?? this.hash,
+      isUsed: isUsed ?? this.isUsed,
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     );
   }
 }

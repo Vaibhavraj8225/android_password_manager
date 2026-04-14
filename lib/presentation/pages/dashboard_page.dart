@@ -28,14 +28,26 @@ class _DashboardPageState extends State<DashboardPage> {
   Future<void> _openAddPasswordPage() async {
     await Navigator.push<void>(
       context,
+<<<<<<< HEAD
       MaterialPageRoute(builder: (_) => const AddPasswordPage()),
+=======
+      MaterialPageRoute(
+        builder: (_) => const AddPasswordPage(),
+      ),
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     );
   }
 
   Future<void> _openChangePasswordPage() async {
     await Navigator.push<bool>(
       context,
+<<<<<<< HEAD
       MaterialPageRoute(builder: (_) => const ChangePasswordPage()),
+=======
+      MaterialPageRoute(
+        builder: (_) => const ChangePasswordPage(),
+      ),
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     );
   }
 
@@ -47,7 +59,15 @@ class _DashboardPageState extends State<DashboardPage> {
         return;
       }
 
+<<<<<<< HEAD
       Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+=======
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home',
+        (route) => false,
+      );
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     } catch (_) {
       if (!mounted) {
         return;
@@ -140,9 +160,15 @@ class _DashboardPageState extends State<DashboardPage> {
       _deletingIndex = index;
     });
 
+<<<<<<< HEAD
     final updatedEntries = List<Map<String, dynamic>>.from(
       controller.currentVault.entries,
     )..removeAt(index);
+=======
+    final updatedEntries =
+        List<Map<String, dynamic>>.from(controller.currentVault.entries)
+          ..removeAt(index);
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 
     try {
       await controller.saveVault(
@@ -156,9 +182,15 @@ class _DashboardPageState extends State<DashboardPage> {
         return;
       }
 
+<<<<<<< HEAD
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Credential deleted.')));
+=======
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Credential deleted.')),
+      );
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     } catch (_) {
       if (!mounted) {
         return;
@@ -263,7 +295,15 @@ class _DashboardPageState extends State<DashboardPage> {
         return;
       }
 
+<<<<<<< HEAD
       Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+=======
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home',
+        (route) => false,
+      );
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
       messenger.showSnackBar(
         const SnackBar(content: Text('Master account deleted.')),
       );
@@ -272,11 +312,18 @@ class _DashboardPageState extends State<DashboardPage> {
         return;
       }
 
+<<<<<<< HEAD
       final message =
           controller.errorMessage ?? 'Could not delete master account.';
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(message)));
+=======
+      final message = controller.errorMessage ?? 'Could not delete master account.';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     }
   }
 
@@ -329,7 +376,13 @@ class _DashboardPageState extends State<DashboardPage> {
         child: const Icon(Icons.add),
       ),
       body: vault.entries.isEmpty
+<<<<<<< HEAD
           ? const Center(child: Text('No passwords saved yet'))
+=======
+          ? const Center(
+              child: Text('No passwords saved yet'),
+            )
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
           : ListView.builder(
               itemCount: vault.entries.length,
               itemBuilder: (_, i) {

@@ -7,7 +7,14 @@ import '../../core/storage_service.dart';
 import '../models/account_model.dart';
 
 class AccountLocalDataSource {
+<<<<<<< HEAD
   AccountLocalDataSource(this._secureStorage, this._storageService);
+=======
+  AccountLocalDataSource(
+    this._secureStorage,
+    this._storageService,
+  );
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 
   final FlutterSecureStorage _secureStorage;
   final StorageService _storageService;
@@ -26,8 +33,14 @@ class AccountLocalDataSource {
     final decoded = jsonDecode(raw) as List<dynamic>;
     return decoded
         .map(
+<<<<<<< HEAD
           (item) =>
               AccountModel.fromJson(Map<String, dynamic>.from(item as Map)),
+=======
+          (item) => AccountModel.fromJson(
+            Map<String, dynamic>.from(item as Map),
+          ),
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
         )
         .toList();
   }
@@ -54,6 +67,7 @@ class AccountLocalDataSource {
     await prefs.setString(_activeAccountIdKey, id);
   }
 
+<<<<<<< HEAD
   Future<void> storeRecoveryRequest(
     String accountId,
     RecoveryRequestModel? request,
@@ -78,6 +92,8 @@ class AccountLocalDataSource {
     );
   }
 
+=======
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
   Future<void> _migrateLegacyAccountIfNeeded() async {
     final prefs = await SharedPreferences.getInstance();
     final alreadyMigrated = prefs.getBool(_migrationFlagKey) ?? false;
@@ -93,8 +109,11 @@ class AccountLocalDataSource {
         final account = AccountModel.fromJson({
           'id': username,
           ...legacy,
+<<<<<<< HEAD
           'recovery_key_salt': '',
           'recovery_key_hash': '',
+=======
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
           'created_at': DateTime.now().toIso8601String(),
           'last_used_at': DateTime.now().toIso8601String(),
         });
@@ -106,6 +125,9 @@ class AccountLocalDataSource {
 
     await prefs.setBool(_migrationFlagKey, true);
   }
+<<<<<<< HEAD
 
   String _recoveryRequestKey(String accountId) => 'recovery_request_$accountId';
+=======
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 }

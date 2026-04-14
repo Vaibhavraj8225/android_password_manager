@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../domain/usecases/account_usecases.dart';
 import '../state/account_scope.dart';
+<<<<<<< HEAD
 import '../widgets/recovery_key_dialog.dart';
+=======
+import '../widgets/backup_codes_dialog.dart';
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -12,11 +16,17 @@ class ChangePasswordPage extends StatefulWidget {
 }
 
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
+<<<<<<< HEAD
   final TextEditingController _currentPasswordController =
       TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+=======
+  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
   bool _isSubmitting = false;
   bool _isCurrentPasswordObscured = true;
   bool _isNewPasswordObscured = true;
@@ -32,9 +42,15 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   Future<void> _changePassword() async {
     if (_newPasswordController.text != _confirmPasswordController.text) {
+<<<<<<< HEAD
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Passwords do not match.')));
+=======
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match.')),
+      );
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
       return;
     }
 
@@ -43,7 +59,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     });
 
     try {
+<<<<<<< HEAD
       final recoveryKey = await AccountScope.of(context).updatePassword(
+=======
+      final backupCodes = await AccountScope.of(context).updatePassword(
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
         currentPassword: _currentPasswordController.text,
         newPassword: _newPasswordController.text,
       );
@@ -52,10 +72,17 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         return;
       }
 
+<<<<<<< HEAD
       await showRecoveryKeyDialog(
         context,
         recoveryKey: recoveryKey,
         title: 'New Recovery Key',
+=======
+      await showBackupCodesDialog(
+        context,
+        backupCodes: backupCodes,
+        title: 'New Backup Codes',
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
       );
 
       if (!mounted) {
@@ -72,9 +99,15 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         _isSubmitting = false;
       });
 
+<<<<<<< HEAD
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(error.message)));
+=======
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     } catch (_) {
       if (!mounted) {
         return;
@@ -136,9 +169,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
                 ),
+<<<<<<< HEAD
                 tooltip: _isNewPasswordObscured
                     ? 'Show password'
                     : 'Hide password',
+=======
+                tooltip: _isNewPasswordObscured ? 'Show password' : 'Hide password',
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
               ),
             ),
           ),
@@ -165,6 +202,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
             ),
           ),
+<<<<<<< HEAD
           const SizedBox(height: 20),
           Card(
             child: Padding(
@@ -175,6 +213,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
             ),
           ),
+=======
+>>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
           const SizedBox(height: 24),
           FilledButton(
             onPressed: _isSubmitting ? null : _changePassword,
