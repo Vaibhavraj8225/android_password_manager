@@ -9,7 +9,6 @@ abstract class AccountRepository {
   Future<void> saveAccount(AccountEntity account);
   Future<void> deleteAccount(String id);
   Future<void> setActiveAccount(String? id);
-<<<<<<< HEAD
   Future<void> storeRecoveryKeyHash({
     required String accountId,
     required String recoveryKeySalt,
@@ -22,6 +21,6 @@ abstract class AccountRepository {
     RecoveryRequestEntity? request,
   );
   Future<RecoveryRequestEntity?> getRecoveryRequest(String accountId);
-=======
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 }
+
+

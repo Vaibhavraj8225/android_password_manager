@@ -1,18 +1,9 @@
 import 'dart:convert';
-<<<<<<< HEAD
 
 import '../../core/key_derivation.dart';
 import '../../core/recovery_key_generator.dart';
 import '../../core/secure_random_generator.dart';
 import '../../domain/entities/account_entity.dart';
-=======
-import 'dart:math';
-
-import 'package:cryptography/cryptography.dart';
-
-import '../../core/key_derivation.dart';
-import '../entities/account_entity.dart';
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 import '../repositories/account_repository.dart';
 
 class GetAccounts {
@@ -35,22 +26,14 @@ class AddAccount {
   AddAccount(
     this._repository,
     this._keyDerivation,
-<<<<<<< HEAD
     this._recoveryKeyGenerator,
     this._randomGenerator,
-=======
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
   );
 
   final AccountRepository _repository;
   final KeyDerivation _keyDerivation;
-<<<<<<< HEAD
   final RecoveryKeyGenerator _recoveryKeyGenerator;
   final SecureRandomGenerator _randomGenerator;
-=======
-  final Random _random = Random.secure();
-  final Sha256 _sha256 = Sha256();
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 
   Future<AccountCreationResult> call({
     required String username,
@@ -69,7 +52,6 @@ class AddAccount {
 
     final existing = await _repository.getAccountByUsername(normalizedUsername);
     if (existing != null) {
-<<<<<<< HEAD
       throw const AccountException(
         'That account is already saved on this device.',
       );
@@ -79,15 +61,6 @@ class AddAccount {
     final passwordHash = await _keyDerivation.deriveKey(password, passwordSalt);
     final recoveryKey = await _recoveryKeyGenerator.generate();
     final vaultKey = _randomGenerator.bytes(32);
-=======
-      throw const AccountException('That account is already saved on this device.');
-    }
-
-    final passwordSalt = _randomBytes(16);
-    final passwordHash = await _keyDerivation.deriveKey(password, passwordSalt);
-    final backupBundle = await _generateBackupCodes();
-    final vaultKey = _randomBytes(32);
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     final now = DateTime.now();
 
     final account = AccountEntity(
@@ -96,14 +69,9 @@ class AddAccount {
       passwordSalt: base64Encode(passwordSalt),
       passwordHash: base64Encode(passwordHash),
       vaultKey: base64Encode(vaultKey),
-<<<<<<< HEAD
       recoveryKeySalt: recoveryKey.salt,
       recoveryKeyHash: recoveryKey.hash,
       authToken: authToken?.trim().isEmpty ?? true ? null : authToken?.trim(),
-=======
-      authToken: authToken?.trim().isEmpty ?? true ? null : authToken?.trim(),
-      backupCodes: backupBundle.records,
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
       createdAt: now,
       lastUsedAt: now,
     );
@@ -114,11 +82,7 @@ class AddAccount {
     return AccountCreationResult(
       account: account,
       vaultKey: vaultKey,
-<<<<<<< HEAD
       recoveryKey: recoveryKey.plainText,
-=======
-      backupCodes: backupBundle.plainCodes,
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     );
   }
 
@@ -141,59 +105,11 @@ class AddAccount {
     return null;
   }
 
-<<<<<<< HEAD
   String _generateAccountId() {
     final timestamp = DateTime.now().microsecondsSinceEpoch;
     final suffix = base64UrlEncode(
       _randomGenerator.bytes(9),
     ).replaceAll('=', '');
-=======
-  Future<_BackupCodeBundle> _generateBackupCodes() async {
-    const backupCodeCount = 6;
-    const backupCodeLength = 10;
-    const charset = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-
-    final plainCodes = <String>{};
-    while (plainCodes.length < backupCodeCount) {
-      final buffer = StringBuffer();
-      for (var i = 0; i < backupCodeLength; i++) {
-        buffer.write(charset[_random.nextInt(charset.length)]);
-      }
-      plainCodes.add(buffer.toString());
-    }
-
-    final records = <BackupCodeEntity>[];
-    for (final code in plainCodes) {
-      final salt = _randomBytes(16);
-      final hash = await _hashValue(code, salt);
-      records.add(
-        BackupCodeEntity(
-          salt: base64Encode(salt),
-          hash: base64Encode(hash),
-          isUsed: false,
-        ),
-      );
-    }
-
-    return _BackupCodeBundle(
-      plainCodes: plainCodes.toList(),
-      records: records,
-    );
-  }
-
-  Future<List<int>> _hashValue(String value, List<int> salt) async {
-    final digest = await _sha256.hash(salt + utf8.encode(value));
-    return digest.bytes;
-  }
-
-  List<int> _randomBytes(int length) {
-    return List<int>.generate(length, (_) => _random.nextInt(256));
-  }
-
-  String _generateAccountId() {
-    final timestamp = DateTime.now().microsecondsSinceEpoch;
-    final suffix = _random.nextInt(1 << 32).toRadixString(16);
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     return 'acct_$timestamp$suffix';
   }
 }
@@ -206,13 +122,9 @@ class SwitchAccount {
   Future<AccountEntity> call(String accountId) async {
     final account = await _repository.getAccountById(accountId);
     if (account == null) {
-<<<<<<< HEAD
       throw const AccountException(
         'The selected account is no longer available.',
       );
-=======
-      throw const AccountException('The selected account is no longer available.');
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     }
 
     final updated = account.copyWith(lastUsedAt: DateTime.now());
@@ -223,14 +135,7 @@ class SwitchAccount {
 }
 
 class DeleteAccount {
-<<<<<<< HEAD
   DeleteAccount(this._repository, this._keyDerivation);
-=======
-  DeleteAccount(
-    this._repository,
-    this._keyDerivation,
-  );
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 
   final AccountRepository _repository;
   final KeyDerivation _keyDerivation;
@@ -241,24 +146,16 @@ class DeleteAccount {
   }) async {
     final normalizedPassword = password.trim();
     if (normalizedPassword.isEmpty) {
-<<<<<<< HEAD
       throw const AccountException(
         'Enter the master password to delete this account.',
       );
-=======
-      throw const AccountException('Enter the master password to delete this account.');
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     }
 
     final account = await _repository.getAccountById(accountId);
     if (account == null) {
-<<<<<<< HEAD
       throw const AccountException(
         'The selected account is no longer available.',
       );
-=======
-      throw const AccountException('The selected account is no longer available.');
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     }
 
     final derivedHash = await _keyDerivation.deriveKey(
@@ -272,13 +169,9 @@ class DeleteAccount {
 
     final active = await _repository.getActiveAccount();
     final accounts = await _repository.getAccounts();
-<<<<<<< HEAD
     final remaining = accounts
         .where((account) => account.id != accountId)
         .toList();
-=======
-    final remaining = accounts.where((account) => account.id != accountId).toList();
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 
     await _repository.deleteAccount(accountId);
 
@@ -303,27 +196,15 @@ class DeleteAccount {
     }
 
     var result = 0;
-<<<<<<< HEAD
     for (var index = 0; index < left.length; index++) {
       result |= left.codeUnitAt(index) ^ right.codeUnitAt(index);
-=======
-    for (var i = 0; i < left.length; i++) {
-      result |= left.codeUnitAt(i) ^ right.codeUnitAt(i);
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     }
     return result == 0;
   }
 }
 
 class AuthenticateAccount {
-<<<<<<< HEAD
   AuthenticateAccount(this._repository, this._keyDerivation);
-=======
-  AuthenticateAccount(
-    this._repository,
-    this._keyDerivation,
-  );
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 
   final AccountRepository _repository;
   final KeyDerivation _keyDerivation;
@@ -363,13 +244,8 @@ class AuthenticateAccount {
     }
 
     var result = 0;
-<<<<<<< HEAD
     for (var index = 0; index < left.length; index++) {
       result |= left.codeUnitAt(index) ^ right.codeUnitAt(index);
-=======
-    for (var i = 0; i < left.length; i++) {
-      result |= left.codeUnitAt(i) ^ right.codeUnitAt(i);
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     }
     return result == 0;
   }
@@ -388,27 +264,17 @@ class ChangeAccountPassword {
     this._repository,
     this._keyDerivation,
     this._addAccount,
-<<<<<<< HEAD
     this._recoveryKeyGenerator,
     this._randomGenerator,
-=======
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
   );
 
   final AccountRepository _repository;
   final KeyDerivation _keyDerivation;
   final AddAccount _addAccount;
-<<<<<<< HEAD
   final RecoveryKeyGenerator _recoveryKeyGenerator;
   final SecureRandomGenerator _randomGenerator;
 
   Future<String> call({
-=======
-  final Sha256 _sha256 = Sha256();
-  final Random _random = Random.secure();
-
-  Future<List<String>> call({
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     required String accountId,
     required String currentPassword,
     required String newPassword,
@@ -431,7 +297,6 @@ class ChangeAccountPassword {
       throw const AccountException('Choose a different new password.');
     }
 
-<<<<<<< HEAD
     return _rotateCredentials(
       account: account,
       newPassword: newPassword,
@@ -466,149 +331,33 @@ class ChangeAccountPassword {
     required String newPassword,
     required bool clearRecoveryState,
   }) async {
-=======
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     final passwordError = _addAccount.validatePassword(newPassword);
     if (passwordError != null) {
       throw AccountException(passwordError);
     }
 
-<<<<<<< HEAD
     final newPasswordSalt = _randomGenerator.bytes(16);
-=======
-    final newPasswordSalt = _randomBytes(16);
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     final newPasswordHash = await _keyDerivation.deriveKey(
       newPassword,
       newPasswordSalt,
     );
-<<<<<<< HEAD
     final recoveryKey = await _recoveryKeyGenerator.generate();
-=======
-    final backupBundle = await _generateBackupCodes();
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 
     await _repository.saveAccount(
       account.copyWith(
         passwordSalt: base64Encode(newPasswordSalt),
         passwordHash: base64Encode(newPasswordHash),
-<<<<<<< HEAD
         recoveryKeySalt: recoveryKey.salt,
         recoveryKeyHash: recoveryKey.hash,
-=======
-        backupCodes: backupBundle.records,
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
         lastUsedAt: DateTime.now(),
       ),
     );
 
-<<<<<<< HEAD
     if (clearRecoveryState) {
       await _repository.storeRecoveryRequest(account.id, null);
     }
 
     return recoveryKey.plainText;
-=======
-    return backupBundle.plainCodes;
-  }
-
-  Future<List<String>> resetWithBackupCode({
-    required String username,
-    required String backupCode,
-    required String newPassword,
-  }) async {
-    final account = await _repository.getAccountByUsername(username);
-    if (account == null) {
-      throw const AccountException('Account not found.');
-    }
-
-    final passwordError = _addAccount.validatePassword(newPassword);
-    if (passwordError != null) {
-      throw AccountException(passwordError);
-    }
-
-    final normalizedCode = backupCode.trim().toUpperCase();
-    var matchedIndex = -1;
-    for (var index = 0; index < account.backupCodes.length; index++) {
-      final record = account.backupCodes[index];
-      if (record.isUsed) {
-        continue;
-      }
-
-      final hashed = await _hashValue(
-        normalizedCode,
-        base64Decode(record.salt),
-      );
-      if (_constantTimeEquals(base64Encode(hashed), record.hash)) {
-        matchedIndex = index;
-        break;
-      }
-    }
-
-    if (matchedIndex == -1) {
-      throw const AccountException('Backup code is invalid or already used.');
-    }
-
-    final newPasswordSalt = _randomBytes(16);
-    final newPasswordHash = await _keyDerivation.deriveKey(
-      newPassword,
-      newPasswordSalt,
-    );
-    final backupBundle = await _generateBackupCodes();
-
-    await _repository.saveAccount(
-      account.copyWith(
-        passwordSalt: base64Encode(newPasswordSalt),
-        passwordHash: base64Encode(newPasswordHash),
-        backupCodes: backupBundle.records,
-        lastUsedAt: DateTime.now(),
-      ),
-    );
-
-    return backupBundle.plainCodes;
-  }
-
-  Future<_BackupCodeBundle> _generateBackupCodes() async {
-    const backupCodeCount = 6;
-    const backupCodeLength = 10;
-    const charset = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-
-    final plainCodes = <String>{};
-    while (plainCodes.length < backupCodeCount) {
-      final buffer = StringBuffer();
-      for (var i = 0; i < backupCodeLength; i++) {
-        buffer.write(charset[_random.nextInt(charset.length)]);
-      }
-      plainCodes.add(buffer.toString());
-    }
-
-    final records = <BackupCodeEntity>[];
-    for (final code in plainCodes) {
-      final salt = _randomBytes(16);
-      final hash = await _hashValue(code, salt);
-      records.add(
-        BackupCodeEntity(
-          salt: base64Encode(salt),
-          hash: base64Encode(hash),
-          isUsed: false,
-        ),
-      );
-    }
-
-    return _BackupCodeBundle(
-      plainCodes: plainCodes.toList(),
-      records: records,
-    );
-  }
-
-  Future<List<int>> _hashValue(String value, List<int> salt) async {
-    final digest = await _sha256.hash(salt + utf8.encode(value));
-    return digest.bytes;
-  }
-
-  List<int> _randomBytes(int length) {
-    return List<int>.generate(length, (_) => _random.nextInt(256));
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
   }
 
   bool _constantTimeEquals(String left, String right) {
@@ -617,13 +366,8 @@ class ChangeAccountPassword {
     }
 
     var result = 0;
-<<<<<<< HEAD
     for (var index = 0; index < left.length; index++) {
       result |= left.codeUnitAt(index) ^ right.codeUnitAt(index);
-=======
-    for (var i = 0; i < left.length; i++) {
-      result |= left.codeUnitAt(i) ^ right.codeUnitAt(i);
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     }
     return result == 0;
   }
@@ -633,20 +377,12 @@ class AccountCreationResult {
   const AccountCreationResult({
     required this.account,
     required this.vaultKey,
-<<<<<<< HEAD
     required this.recoveryKey,
-=======
-    required this.backupCodes,
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
   });
 
   final AccountEntity account;
   final List<int> vaultKey;
-<<<<<<< HEAD
   final String recoveryKey;
-=======
-  final List<String> backupCodes;
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 }
 
 class AuthenticatedAccountResult {
@@ -674,16 +410,5 @@ class AccountException implements Exception {
 
   final String message;
 }
-<<<<<<< HEAD
-=======
 
-class _BackupCodeBundle {
-  const _BackupCodeBundle({
-    required this.plainCodes,
-    required this.records,
-  });
 
-  final List<String> plainCodes;
-  final List<BackupCodeEntity> records;
-}
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c

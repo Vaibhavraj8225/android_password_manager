@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/usecases/account_usecases.dart';
-<<<<<<< HEAD
 import '../state/account_scope.dart';
 import '../widgets/recovery_key_dialog.dart';
-=======
-import '../widgets/backup_codes_dialog.dart';
-import '../state/account_scope.dart';
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 
 class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
@@ -19,12 +14,8 @@ class CreateAccountPage extends StatefulWidget {
 class _CreateAccountPageState extends State<CreateAccountPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-<<<<<<< HEAD
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-=======
-  final TextEditingController _confirmPasswordController = TextEditingController();
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
   final TextEditingController _tokenController = TextEditingController();
   bool _isSubmitting = false;
   bool _isPasswordObscured = true;
@@ -45,15 +36,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     final confirmPassword = _confirmPasswordController.text;
 
     if (confirmPassword != password) {
-<<<<<<< HEAD
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Passwords do not match.')));
-=======
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match.')),
-      );
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
       return;
     }
 
@@ -62,11 +47,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     });
 
     try {
-<<<<<<< HEAD
       final recoveryKey = await AccountScope.of(context).createAccount(
-=======
-      final backupCodes = await AccountScope.of(context).createAccount(
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
         username: username,
         password: password,
         authToken: _tokenController.text,
@@ -76,17 +57,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         return;
       }
 
-<<<<<<< HEAD
       await showRecoveryKeyDialog(
         context,
         recoveryKey: recoveryKey,
         title: 'Recovery Key',
-=======
-      await showBackupCodesDialog(
-        context,
-        backupCodes: backupCodes,
-        title: 'Backup Codes',
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
       );
 
       if (!mounted) {
@@ -103,15 +77,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         _isSubmitting = false;
       });
 
-<<<<<<< HEAD
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(error.message)));
-=======
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message)),
-      );
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     } catch (_) {
       if (!mounted) {
         return;
@@ -163,13 +131,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
                 ),
-<<<<<<< HEAD
                 tooltip: _isPasswordObscured
                     ? 'Show password'
                     : 'Hide password',
-=======
-                tooltip: _isPasswordObscured ? 'Show password' : 'Hide password',
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
               ),
             ),
           ),
@@ -196,7 +160,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               ),
             ),
           ),
-<<<<<<< HEAD
           const SizedBox(height: 20),
           Card(
             child: Padding(
@@ -207,8 +170,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               ),
             ),
           ),
-=======
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
           const SizedBox(height: 24),
           FilledButton(
             onPressed: _isSubmitting ? null : _createAccount,
@@ -219,3 +180,5 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     );
   }
 }
+
+

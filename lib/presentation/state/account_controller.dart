@@ -3,19 +3,13 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-<<<<<<< HEAD
 import '../../core/device_trust_manager.dart';
-=======
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 import '../../core/storage_service.dart';
 import '../../data/vault_repository.dart';
 import '../../domain/entities/account_entity.dart';
 import '../../domain/models/vault.dart';
 import '../../domain/usecases/account_usecases.dart';
-<<<<<<< HEAD
 import '../../domain/usecases/recovery_usecases.dart';
-=======
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
 
 class AccountController extends ChangeNotifier {
   AccountController({
@@ -27,12 +21,9 @@ class AccountController extends ChangeNotifier {
     required this.deleteAccount,
     required this.authenticateAccount,
     required this.changeAccountPassword,
-<<<<<<< HEAD
     required this.initiateRecovery,
     required this.completeRecovery,
     required this.deviceTrustManager,
-=======
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     required this.vaultRepository,
     required this.storageService,
   });
@@ -45,12 +36,9 @@ class AccountController extends ChangeNotifier {
   final DeleteAccount deleteAccount;
   final AuthenticateAccount authenticateAccount;
   final ChangeAccountPassword changeAccountPassword;
-<<<<<<< HEAD
   final InitiateRecovery initiateRecovery;
   final CompleteRecovery completeRecovery;
   final DeviceTrustManager deviceTrustManager;
-=======
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
   final VaultRepository vaultRepository;
   final StorageService storageService;
 
@@ -66,14 +54,8 @@ class AccountController extends ChangeNotifier {
   List<AccountEntity> get accounts => List.unmodifiable(_accounts);
   AccountEntity? get activeAccount => _activeAccount;
   Vault get currentVault => _currentVault;
-<<<<<<< HEAD
   List<int>? get encryptionKey =>
       _encryptionKey == null ? null : List<int>.unmodifiable(_encryptionKey!);
-=======
-  List<int>? get encryptionKey => _encryptionKey == null
-      ? null
-      : List<int>.unmodifiable(_encryptionKey!);
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
   bool get isInitialized => _isInitialized;
   bool get isBusy => _isBusy;
   String? get errorMessage => _errorMessage;
@@ -86,12 +68,8 @@ class AccountController extends ChangeNotifier {
       _clearError();
       try {
         _accounts = await getAccounts();
-<<<<<<< HEAD
         _activeAccount =
             await getActiveAccount() ?? _selectActiveAccount(_accounts);
-=======
-        _activeAccount = await getActiveAccount() ?? _selectActiveAccount(_accounts);
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
         if (_activeAccount != null) {
           _encryptionKey = base64Decode(_activeAccount!.vaultKey);
           _currentVault = await vaultRepository.load(
@@ -114,11 +92,7 @@ class AccountController extends ChangeNotifier {
     });
   }
 
-<<<<<<< HEAD
   Future<String> createAccount({
-=======
-  Future<List<String>> createAccount({
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     required String username,
     required String password,
     String? authToken,
@@ -137,20 +111,13 @@ class AccountController extends ChangeNotifier {
           result.vaultKey,
           Vault.empty(),
         );
-<<<<<<< HEAD
         await deviceTrustManager.markTrusted(result.account.id);
-=======
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
         await _refreshFromAccount(
           result.account,
           vaultOverride: Vault.empty(),
           encryptionKey: result.vaultKey,
         );
-<<<<<<< HEAD
         return result.recoveryKey;
-=======
-        return result.backupCodes;
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
       } finally {
         _setBusy(false);
       }
@@ -173,10 +140,7 @@ class AccountController extends ChangeNotifier {
           authenticated.account.id,
           authenticated.vaultKey,
         );
-<<<<<<< HEAD
         await deviceTrustManager.markTrusted(authenticated.account.id);
-=======
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
         await _refreshFromAccount(
           authenticated.account,
           vaultOverride: vault,
@@ -212,7 +176,6 @@ class AccountController extends ChangeNotifier {
       _setBusy(true);
       _clearError();
       try {
-        await storageService.clearLegacyMasterAccount();
         await logoutAccount();
         _activeAccount = null;
         _encryptionKey = null;
@@ -237,10 +200,7 @@ class AccountController extends ChangeNotifier {
           accountId: accountId,
           password: password,
         );
-<<<<<<< HEAD
         await deviceTrustManager.clearTrust(accountId);
-=======
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
         await storageService.deleteVault(accountId);
         _accounts = await getAccounts();
 
@@ -260,12 +220,8 @@ class AccountController extends ChangeNotifier {
             _currentVault = vault;
           }
         } else if (_activeAccount != null) {
-<<<<<<< HEAD
           _activeAccount =
               _findAccountById(_activeAccount!.id) ?? _activeAccount;
-=======
-          _activeAccount = _findAccountById(_activeAccount!.id) ?? _activeAccount;
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
         }
 
         notifyListeners();
@@ -275,11 +231,7 @@ class AccountController extends ChangeNotifier {
     });
   }
 
-<<<<<<< HEAD
   Future<String> updatePassword({
-=======
-  Future<List<String>> updatePassword({
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     required String currentPassword,
     required String newPassword,
   }) {
@@ -292,11 +244,7 @@ class AccountController extends ChangeNotifier {
       _setBusy(true);
       _clearError();
       try {
-<<<<<<< HEAD
         final recoveryKey = await changeAccountPassword(
-=======
-        final backupCodes = await changeAccountPassword(
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
           accountId: active.id,
           currentPassword: currentPassword,
           newPassword: newPassword,
@@ -304,18 +252,13 @@ class AccountController extends ChangeNotifier {
         _accounts = await getAccounts();
         _activeAccount = _findAccountById(active.id) ?? active;
         notifyListeners();
-<<<<<<< HEAD
         return recoveryKey;
-=======
-        return backupCodes;
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
       } finally {
         _setBusy(false);
       }
     });
   }
 
-<<<<<<< HEAD
   Future<RecoveryInitiationResult> startRecovery({
     required String username,
     required String recoveryKey,
@@ -350,30 +293,18 @@ class AccountController extends ChangeNotifier {
 
   Future<String> resetPasswordAfterRecovery({
     required String username,
-=======
-  Future<List<String>> resetPasswordWithBackupCode({
-    required String username,
-    required String backupCode,
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
     required String newPassword,
   }) {
     return _runSerialized(() async {
       _setBusy(true);
       _clearError();
       try {
-<<<<<<< HEAD
         final recoveryKey = await changeAccountPassword.resetWithRecovery(
           username: username,
-=======
-        final backupCodes = await changeAccountPassword.resetWithBackupCode(
-          username: username,
-          backupCode: backupCode,
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
           newPassword: newPassword,
         );
         _accounts = await getAccounts();
         final normalizedUsername = username.trim().toLowerCase();
-<<<<<<< HEAD
         if (_activeAccount?.username.trim().toLowerCase() ==
             normalizedUsername) {
           _activeAccount =
@@ -381,13 +312,6 @@ class AccountController extends ChangeNotifier {
         }
         notifyListeners();
         return recoveryKey;
-=======
-        if (_activeAccount?.username.trim().toLowerCase() == normalizedUsername) {
-          _activeAccount = _findAccountById(_activeAccount!.id) ?? _activeAccount;
-        }
-        notifyListeners();
-        return backupCodes;
->>>>>>> 7940fbee775e5489d06b54124daab217969bae7c
       } finally {
         _setBusy(false);
       }
@@ -476,3 +400,5 @@ class AccountController extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+
