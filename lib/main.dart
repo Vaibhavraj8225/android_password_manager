@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app.dart';
 import 'core/app_secure_storage.dart';
+import 'core/biometric_second_factor_service.dart';
 import 'core/crypto_service.dart';
 import 'core/device_id_generator.dart';
 import 'core/device_trust_manager.dart';
@@ -20,6 +21,9 @@ import 'presentation/state/account_controller.dart';
 void main() {
   final secureStorage = AppSecureStorage();
   final storageService = StorageService(secureStorage);
+  final biometricSecondFactorService = BiometricSecondFactorService(
+    secureStorage,
+  );
   final accountRepository = AccountRepositoryImpl(
     AccountLocalDataSource(secureStorage),
   );
@@ -72,6 +76,7 @@ void main() {
         ),
         completeRecovery: CompleteRecovery(accountRepository),
         deviceTrustManager: deviceTrustManager,
+        biometricSecondFactorService: biometricSecondFactorService,
         vaultRepository: VaultRepository(CryptoService(), storageService),
         storageService: storageService,
       ),

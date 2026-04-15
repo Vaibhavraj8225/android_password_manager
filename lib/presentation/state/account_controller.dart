@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import '../../core/biometric_second_factor_service.dart';
 import '../../core/device_trust_manager.dart';
 import '../../core/storage_service.dart';
 import '../../data/vault_repository.dart';
@@ -24,6 +25,7 @@ class AccountController extends ChangeNotifier {
     required this.initiateRecovery,
     required this.completeRecovery,
     required this.deviceTrustManager,
+    required this.biometricSecondFactorService,
     required this.vaultRepository,
     required this.storageService,
   });
@@ -39,6 +41,7 @@ class AccountController extends ChangeNotifier {
   final InitiateRecovery initiateRecovery;
   final CompleteRecovery completeRecovery;
   final DeviceTrustManager deviceTrustManager;
+  final BiometricSecondFactorService biometricSecondFactorService;
   final VaultRepository vaultRepository;
   final StorageService storageService;
 
@@ -48,6 +51,8 @@ class AccountController extends ChangeNotifier {
   List<int>? _encryptionKey;
   bool _isInitialized = false;
   bool _isBusy = false;
+  bool _isBiometricSecondFactorAvailable = false;
+  bool _isBiometricSecondFactorEnabled = false;
   String? _errorMessage;
   Future<void> _queue = Future<void>.value();
 
@@ -58,6 +63,9 @@ class AccountController extends ChangeNotifier {
       _encryptionKey == null ? null : List<int>.unmodifiable(_encryptionKey!);
   bool get isInitialized => _isInitialized;
   bool get isBusy => _isBusy;
+  bool get isBiometricSecondFactorAvailable =>
+      _isBiometricSecondFactorAvailable;
+  bool get isBiometricSecondFactorEnabled => _isBiometricSecondFactorEnabled;
   String? get errorMessage => _errorMessage;
   bool get hasAccounts => _accounts.isNotEmpty;
   bool get isAuthenticated => _activeAccount != null && _encryptionKey != null;
@@ -71,6 +79,7 @@ class AccountController extends ChangeNotifier {
         _activeAccount =
             await getActiveAccount() ?? _selectActiveAccount(_accounts);
         if (_activeAccount != null) {
+          await _loadBiometricSecondFactorState(_activeAccount!.id);
           _encryptionKey = base64Decode(_activeAccount!.vaultKey);
           _currentVault = await vaultRepository.load(
             _activeAccount!.id,
@@ -79,11 +88,15 @@ class AccountController extends ChangeNotifier {
         } else {
           _currentVault = Vault.empty();
           _encryptionKey = null;
+          _isBiometricSecondFactorAvailable = false;
+          _isBiometricSecondFactorEnabled = false;
         }
       } catch (_) {
         _activeAccount = null;
         _encryptionKey = null;
         _currentVault = Vault.empty();
+        _isBiometricSecondFactorAvailable = false;
+        _isBiometricSecondFactorEnabled = false;
         _setError('Unable to load saved accounts.');
       } finally {
         _isInitialized = true;
@@ -136,6 +149,20 @@ class AccountController extends ChangeNotifier {
           username: username,
           password: password,
         );
+
+        final requiresSecondFactor = await biometricSecondFactorService
+            .isEnabledForAccount(authenticated.account.id);
+        if (requiresSecondFactor) {
+          final passed = await biometricSecondFactorService.verifyForLogin(
+            reason: 'Verify your identity to complete sign in.',
+          );
+          if (!passed) {
+            throw const AccountException(
+              'Biometric verification was not completed.',
+            );
+          }
+        }
+
         final vault = await vaultRepository.load(
           authenticated.account.id,
           authenticated.vaultKey,
@@ -180,6 +207,8 @@ class AccountController extends ChangeNotifier {
         _activeAccount = null;
         _encryptionKey = null;
         _currentVault = Vault.empty();
+        _isBiometricSecondFactorAvailable = false;
+        _isBiometricSecondFactorEnabled = false;
         _accounts = await getAccounts();
         notifyListeners();
       } finally {
@@ -201,6 +230,7 @@ class AccountController extends ChangeNotifier {
           password: password,
         );
         await deviceTrustManager.clearTrust(accountId);
+        await biometricSecondFactorService.clearForAccount(accountId);
         await storageService.deleteVault(accountId);
         _accounts = await getAccounts();
 
@@ -209,6 +239,8 @@ class AccountController extends ChangeNotifier {
             _activeAccount = null;
             _encryptionKey = null;
             _currentVault = Vault.empty();
+            _isBiometricSecondFactorAvailable = false;
+            _isBiometricSecondFactorEnabled = false;
           } else {
             final key = base64Decode(result.nextActiveAccount!.vaultKey);
             final vault = await vaultRepository.load(
@@ -218,10 +250,14 @@ class AccountController extends ChangeNotifier {
             _activeAccount = result.nextActiveAccount;
             _encryptionKey = key;
             _currentVault = vault;
+            await _loadBiometricSecondFactorState(_activeAccount!.id);
           }
         } else if (_activeAccount != null) {
           _activeAccount =
               _findAccountById(_activeAccount!.id) ?? _activeAccount;
+          if (_activeAccount != null) {
+            await _loadBiometricSecondFactorState(_activeAccount!.id);
+          }
         }
 
         notifyListeners();
@@ -332,6 +368,52 @@ class AccountController extends ChangeNotifier {
     });
   }
 
+  Future<void> setBiometricSecondFactorEnabled(bool enabled) {
+    return _runSerialized(() async {
+      final active = _activeAccount;
+      if (active == null) {
+        throw const AccountException('No active account found.');
+      }
+
+      _setBusy(true);
+      _clearError();
+      try {
+        if (enabled) {
+          final available = await biometricSecondFactorService
+              .isBiometricAvailable();
+          _isBiometricSecondFactorAvailable = available;
+          if (!available) {
+            _isBiometricSecondFactorEnabled = false;
+            throw const AccountException(
+              'Biometric authentication is not available on this device.',
+            );
+          }
+
+          final passed = await biometricSecondFactorService.verifyForLogin(
+            reason: 'Verify biometrics to enable secure sign in.',
+          );
+          if (!passed) {
+            throw const AccountException(
+              'Biometric verification was canceled.',
+            );
+          }
+        } else {
+          _isBiometricSecondFactorAvailable = await biometricSecondFactorService
+              .isBiometricAvailable();
+        }
+
+        await biometricSecondFactorService.setEnabledForAccount(
+          active.id,
+          enabled,
+        );
+        _isBiometricSecondFactorEnabled = enabled;
+        notifyListeners();
+      } finally {
+        _setBusy(false);
+      }
+    });
+  }
+
   Future<T> _runSerialized<T>(Future<T> Function() operation) {
     final completer = Completer<T>();
     _queue = _queue.catchError((_) {}).then((_) async {
@@ -355,9 +437,18 @@ class AccountController extends ChangeNotifier {
   }) async {
     _accounts = await getAccounts();
     _activeAccount = _findAccountById(account.id) ?? account;
+    await _loadBiometricSecondFactorState(_activeAccount!.id);
     _encryptionKey = List<int>.from(encryptionKey);
     _currentVault = vaultOverride;
     notifyListeners();
+  }
+
+  Future<void> _loadBiometricSecondFactorState(String accountId) async {
+    _isBiometricSecondFactorAvailable = await biometricSecondFactorService
+        .isBiometricAvailable();
+    _isBiometricSecondFactorEnabled = _isBiometricSecondFactorAvailable
+        ? await biometricSecondFactorService.isEnabledForAccount(accountId)
+        : false;
   }
 
   AccountEntity? _findAccountById(String id) {
@@ -400,5 +491,3 @@ class AccountController extends ChangeNotifier {
     notifyListeners();
   }
 }
-
-

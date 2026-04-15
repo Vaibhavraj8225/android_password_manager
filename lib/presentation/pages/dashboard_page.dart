@@ -78,6 +78,26 @@ class _DashboardPageState extends State<DashboardPage> {
                       },
               ),
               ListTile(
+                leading: const Icon(Icons.fingerprint_outlined),
+                title: const Text('Biometric Login 2FA'),
+                subtitle: Text(
+                  controller.isBiometricSecondFactorAvailable
+                      ? 'Require biometrics after password sign in'
+                      : 'Biometrics unavailable on this device',
+                ),
+                trailing: Switch(
+                  value: controller.isBiometricSecondFactorEnabled,
+                  onChanged: controller.isBusy ||
+                          (!controller.isBiometricSecondFactorAvailable &&
+                              !controller.isBiometricSecondFactorEnabled)
+                      ? null
+                      : (enabled) {
+                          Navigator.pop(sheetContext);
+                          _setBiometricSecondFactor(enabled);
+                        },
+                ),
+              ),
+              ListTile(
                 leading: const Icon(Icons.logout_rounded),
                 title: const Text('Logout'),
                 onTap: controller.isBusy
@@ -104,6 +124,29 @@ class _DashboardPageState extends State<DashboardPage> {
         );
       },
     );
+  }
+
+  Future<void> _setBiometricSecondFactor(bool enabled) async {
+    final controller = AccountScope.of(context);
+    try {
+      await controller.setBiometricSecondFactorEnabled(enabled);
+      if (!mounted) {
+        return;
+      }
+
+      final message = enabled
+          ? 'Biometric second-factor is enabled.'
+          : 'Biometric second-factor is disabled.';
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    } on Exception {
+      if (!mounted) {
+        return;
+      }
+
+      final message =
+          controller.errorMessage ?? 'Could not update biometric second-factor.';
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    }
   }
 
   Future<void> _deleteCredential(int index) async {
