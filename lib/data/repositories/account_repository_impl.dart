@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../domain/entities/account_entity.dart';
 import '../../domain/repositories/account_repository.dart';
 import '../datasources/account_local_data_source.dart';
@@ -7,6 +9,8 @@ class AccountRepositoryImpl implements AccountRepository {
   AccountRepositoryImpl(this._localDataSource);
 
   final AccountLocalDataSource _localDataSource;
+  static final Map<String, Future<void>> _recoveryQueues =
+      <String, Future<void>>{};
 
   @override
   Future<List<AccountEntity>> getAccounts() => _localDataSource.getAccounts();
@@ -132,6 +136,58 @@ class AccountRepositoryImpl implements AccountRepository {
   @override
   Future<RecoveryRequestEntity?> getRecoveryRequest(String accountId) {
     return _localDataSource.getRecoveryRequest(accountId);
+  }
+
+  @override
+  Future<bool> consumeRecoveryAuthorization({
+    required String accountId,
+    required DateTime now,
+  }) {
+    return _withRecoveryQueue<bool>(accountId, () async {
+      final request = await _localDataSource.getRecoveryRequest(accountId);
+      if (request == null) {
+        return false;
+      }
+      if (request.authorizationUsed) {
+        return false;
+      }
+      if (!request.isAuthorized(now)) {
+        return false;
+      }
+
+      await _localDataSource.storeRecoveryRequest(
+        accountId,
+        RecoveryRequestModel.fromEntity(
+          request.copyWith(
+            authorizationUsed: true,
+            attemptCount: 0,
+            clearLockedUntil: true,
+          ),
+        ),
+      );
+      return true;
+    });
+  }
+
+  Future<T> _withRecoveryQueue<T>(
+    String accountId,
+    Future<T> Function() operation,
+  ) {
+    final completer = Completer<T>();
+    final previous = _recoveryQueues[accountId] ?? Future<void>.value();
+    final next = previous.catchError((_) {}).then((_) async {
+      try {
+        completer.complete(await operation());
+      } catch (error, stackTrace) {
+        completer.completeError(error, stackTrace);
+      }
+    });
+    _recoveryQueues[accountId] = next;
+    return completer.future.whenComplete(() {
+      if (identical(_recoveryQueues[accountId], next)) {
+        _recoveryQueues.remove(accountId);
+      }
+    });
   }
 }
 

@@ -69,6 +69,8 @@ class AccountModel extends AccountEntity {
 class RecoveryRequestModel extends RecoveryRequestEntity {
   const RecoveryRequestModel({
     required super.attemptCount,
+    super.delayConsumed,
+    super.authorizationUsed,
     super.requestedAt,
     super.availableAt,
     super.lockedUntil,
@@ -79,6 +81,8 @@ class RecoveryRequestModel extends RecoveryRequestEntity {
   factory RecoveryRequestModel.fromJson(Map<String, dynamic> json) {
     return RecoveryRequestModel(
       attemptCount: json['attempt_count'] as int? ?? 0,
+      delayConsumed: json['delay_consumed'] as bool? ?? false,
+      authorizationUsed: json['authorization_used'] as bool? ?? false,
       requestedAt: AccountModel._readDate(json['requested_at'] as String?),
       availableAt: AccountModel._readDate(json['available_at'] as String?),
       lockedUntil: AccountModel._readDate(json['locked_until'] as String?),
@@ -92,6 +96,8 @@ class RecoveryRequestModel extends RecoveryRequestEntity {
   factory RecoveryRequestModel.fromEntity(RecoveryRequestEntity entity) {
     return RecoveryRequestModel(
       attemptCount: entity.attemptCount,
+      delayConsumed: entity.delayConsumed,
+      authorizationUsed: entity.authorizationUsed,
       requestedAt: entity.requestedAt,
       availableAt: entity.availableAt,
       lockedUntil: entity.lockedUntil,
@@ -102,6 +108,8 @@ class RecoveryRequestModel extends RecoveryRequestEntity {
 
   Map<String, dynamic> toJson() => {
     'attempt_count': attemptCount,
+    'delay_consumed': delayConsumed,
+    'authorization_used': authorizationUsed,
     'requested_at': requestedAt?.toIso8601String(),
     'available_at': availableAt?.toIso8601String(),
     'locked_until': lockedUntil?.toIso8601String(),

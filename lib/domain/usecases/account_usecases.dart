@@ -318,6 +318,17 @@ class ChangeAccountPassword {
     if (recoveryRequest == null || !recoveryRequest.isAuthorized(now)) {
       throw const AccountException('Recovery could not be completed.');
     }
+    if (recoveryRequest.authorizationUsed) {
+      throw const AccountException('Recovery already used.');
+    }
+
+    final consumed = await _repository.consumeRecoveryAuthorization(
+      accountId: account.id,
+      now: now,
+    );
+    if (!consumed) {
+      throw const AccountException('Recovery already used.');
+    }
 
     return _rotateCredentials(
       account: account,

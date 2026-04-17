@@ -21,6 +21,10 @@ abstract class AccountRepository {
     RecoveryRequestEntity? request,
   );
   Future<RecoveryRequestEntity?> getRecoveryRequest(String accountId);
+  Future<bool> consumeRecoveryAuthorization({
+    required String accountId,
+    required DateTime now,
+  });
 }
 
 

@@ -32,10 +32,14 @@ class ValidateRecoveryKey {
   }) async {
     final normalizedUsername = username.trim();
     final account = await _repository.getAccountByUsername(normalizedUsername);
-    if (account == null ||
-        account.recoveryKeyHash.isEmpty ||
-        account.recoveryKeySalt.isEmpty) {
-      throw await _registerFailure(accountId: account?.id);
+    if (account == null) {
+      await _performDummyHash(recoveryKey);
+      throw await _registerFailure(accountId: null);
+    }
+
+    if (account.recoveryKeyHash.isEmpty || account.recoveryKeySalt.isEmpty) {
+      await _performDummyHash(recoveryKey);
+      throw await _registerFailure(accountId: account.id);
     }
 
     final existingRequest = await _repository.getRecoveryRequest(account.id);
@@ -57,9 +61,20 @@ class ValidateRecoveryKey {
 
     await _repository.storeRecoveryRequest(
       account.id,
-      state.copyWith(attemptCount: 0, clearLockedUntil: true),
+      state.copyWith(
+        attemptCount: 0,
+        clearLockedUntil: true,
+        authorizationUsed: false,
+      ),
     );
     return account;
+  }
+
+  Future<void> _performDummyHash(String recoveryKey) async {
+    final normalized = _recoveryKeyGenerator.normalize(recoveryKey);
+    final bytes = utf8.encode(normalized.isEmpty ? 'DUMMYRECOVERYKEY' : normalized);
+    final salt = List<int>.generate(16, (index) => bytes[index % bytes.length]);
+    await _hashingUtility.sha256Base64(value: normalized, salt: salt);
   }
 
   Future<AccountException> _registerFailure({
@@ -119,6 +134,8 @@ class InitiateRecovery {
               .copyWith(
                 requestedAt: now,
                 availableAt: now,
+                delayConsumed: true,
+                authorizationUsed: false,
                 attemptCount: 0,
                 clearLockedUntil: true,
                 authorizedAt: now,
@@ -132,32 +149,32 @@ class InitiateRecovery {
       );
     }
 
-    final availableAt = existingRequest?.availableAt;
-    if (availableAt != null && !availableAt.isAfter(now)) {
-      final authorizedRequest = existingRequest!.copyWith(
-        attemptCount: 0,
-        clearLockedUntil: true,
-        authorizedAt: now,
-        authorizationExpiresAt: now.add(_authorizationWindow),
-      );
-      await _repository.storeRecoveryRequest(account.id, authorizedRequest);
-      return RecoveryInitiationResult(
-        username: account.username,
-        status: RecoveryStatus.immediateReset,
-        availableAt: now,
-      );
-    }
+    final needsNewDelay =
+        existingRequest == null ||
+        existingRequest.delayConsumed ||
+        existingRequest.authorizationUsed;
 
-    final request =
-        (existingRequest ?? const RecoveryRequestEntity(attemptCount: 0))
-            .copyWith(
-              requestedAt: existingRequest?.requestedAt ?? now,
-              availableAt: availableAt ?? now.add(_recoveryDelay),
-              attemptCount: 0,
-              clearLockedUntil: true,
-              clearAuthorizedAt: true,
-              clearAuthorizationExpiresAt: true,
-            );
+    final request = needsNewDelay
+        ? const RecoveryRequestEntity(attemptCount: 0).copyWith(
+            requestedAt: now,
+            availableAt: now.add(_recoveryDelay),
+            delayConsumed: false,
+            authorizationUsed: false,
+            attemptCount: 0,
+            clearLockedUntil: true,
+            clearAuthorizedAt: true,
+            clearAuthorizationExpiresAt: true,
+          )
+        : existingRequest.copyWith(
+            requestedAt: existingRequest.requestedAt ?? now,
+            availableAt: existingRequest.availableAt ?? now.add(_recoveryDelay),
+            delayConsumed: false,
+            authorizationUsed: false,
+            attemptCount: 0,
+            clearLockedUntil: true,
+            clearAuthorizedAt: true,
+            clearAuthorizationExpiresAt: true,
+          );
     await _repository.storeRecoveryRequest(account.id, request);
 
     return RecoveryInitiationResult(
@@ -191,29 +208,41 @@ class CompleteRecovery {
       throw const AccountException('Recovery could not be completed.');
     }
 
-    if (request.isAuthorized(now)) {
+    if (request.authorizationUsed) {
+      throw const AccountException('Recovery already completed. Restart recovery.');
+    }
+
+    if (!request.delayConsumed) {
+      final availableAt = request.availableAt;
+      if (availableAt == null || availableAt.isAfter(now)) {
+        throw const AccountException('Recovery could not be completed.');
+      }
+
+      final authorizedRequest = request.copyWith(
+        delayConsumed: true,
+        authorizationUsed: false,
+        authorizedAt: now,
+        authorizationExpiresAt: now.add(_authorizationWindow),
+        attemptCount: 0,
+        clearLockedUntil: true,
+      );
+      await _repository.storeRecoveryRequest(account.id, authorizedRequest);
+
       return CompletedRecoveryResult(
         username: account.username,
-        expiresAt: request.authorizationExpiresAt!,
+        expiresAt: authorizedRequest.authorizationExpiresAt!,
       );
     }
 
-    final availableAt = request.availableAt;
-    if (availableAt == null || availableAt.isAfter(now)) {
-      throw const AccountException('Recovery could not be completed.');
+    if (!request.isAuthorized(now)) {
+      throw const AccountException(
+        'Authorization expired. Restart recovery.',
+      );
     }
-
-    final authorizedRequest = request.copyWith(
-      authorizedAt: now,
-      authorizationExpiresAt: now.add(_authorizationWindow),
-      attemptCount: 0,
-      clearLockedUntil: true,
-    );
-    await _repository.storeRecoveryRequest(account.id, authorizedRequest);
 
     return CompletedRecoveryResult(
       username: account.username,
-      expiresAt: authorizedRequest.authorizationExpiresAt!,
+      expiresAt: request.authorizationExpiresAt!,
     );
   }
 }

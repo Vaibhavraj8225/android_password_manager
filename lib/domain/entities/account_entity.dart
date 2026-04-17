@@ -53,6 +53,8 @@ class AccountEntity {
 class RecoveryRequestEntity {
   const RecoveryRequestEntity({
     required this.attemptCount,
+    this.delayConsumed = false,
+    this.authorizationUsed = false,
     this.requestedAt,
     this.availableAt,
     this.lockedUntil,
@@ -63,6 +65,8 @@ class RecoveryRequestEntity {
   final DateTime? requestedAt;
   final DateTime? availableAt;
   final int attemptCount;
+  final bool delayConsumed;
+  final bool authorizationUsed;
   final DateTime? lockedUntil;
   final DateTime? authorizedAt;
   final DateTime? authorizationExpiresAt;
@@ -84,6 +88,8 @@ class RecoveryRequestEntity {
     DateTime? requestedAt,
     DateTime? availableAt,
     int? attemptCount,
+    bool? delayConsumed,
+    bool? authorizationUsed,
     DateTime? lockedUntil,
     DateTime? authorizedAt,
     DateTime? authorizationExpiresAt,
@@ -97,6 +103,8 @@ class RecoveryRequestEntity {
       requestedAt: clearRequestedAt ? null : requestedAt ?? this.requestedAt,
       availableAt: clearAvailableAt ? null : availableAt ?? this.availableAt,
       attemptCount: attemptCount ?? this.attemptCount,
+      delayConsumed: delayConsumed ?? this.delayConsumed,
+      authorizationUsed: authorizationUsed ?? this.authorizationUsed,
       lockedUntil: clearLockedUntil ? null : lockedUntil ?? this.lockedUntil,
       authorizedAt: clearAuthorizedAt
           ? null
