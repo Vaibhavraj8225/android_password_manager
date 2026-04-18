@@ -7,8 +7,11 @@ import 'presentation/pages/login_page.dart';
 import 'presentation/pages/recovery_delay_page.dart';
 import 'presentation/pages/recovery_page.dart';
 import 'presentation/pages/reset_password_page.dart';
+import 'presentation/pages/security_center_page.dart';
+import 'presentation/pages/splash_page.dart';
 import 'presentation/state/account_controller.dart';
 import 'presentation/state/account_scope.dart';
+import 'presentation/theme/app_theme.dart';
 
 class VaultXApp extends StatelessWidget {
   const VaultXApp({required this.accountController, super.key});
@@ -22,9 +25,10 @@ class VaultXApp extends StatelessWidget {
       child: MaterialApp(
         title: 'VaultX',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData.dark(),
-        initialRoute: '/home',
+        theme: AppTheme.dark(),
+        initialRoute: '/splash',
         routes: {
+          '/splash': (context) => const SplashPage(),
           '/home': (context) => const HomePage(),
           '/login': (context) => const LoginPage(),
           '/register': (context) => const CreateAccountPage(),
@@ -32,10 +36,9 @@ class VaultXApp extends StatelessWidget {
           '/recovery-delay': (context) => const RecoveryDelayPage(),
           '/reset-password': (context) => const ResetPasswordPage(),
           '/dashboard': (context) => const DashboardPage(),
+          '/security-center': (context) => const SecurityCenterPage(),
         },
       ),
     );
   }
 }
-
-

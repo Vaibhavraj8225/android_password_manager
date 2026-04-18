@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/app_theme.dart';
+
 Future<void> showBackupCodesDialog(
   BuildContext context, {
   required List<String> backupCodes,
@@ -27,8 +29,18 @@ Future<void> showBackupCodesDialog(
               ),
               const SizedBox(height: 16),
               ...backupCodes.map(
-                (code) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                (code) => Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    border: Border.all(color: AppColors.border),
+                  ),
                   child: SelectableText(
                     code,
                     style: const TextStyle(
@@ -42,7 +54,7 @@ Future<void> showBackupCodesDialog(
           ),
         ),
         actions: [
-          TextButton(
+          TextButton.icon(
             onPressed: () async {
               await Clipboard.setData(
                 ClipboardData(text: backupCodes.join('\n')),
@@ -56,7 +68,8 @@ Future<void> showBackupCodesDialog(
                 const SnackBar(content: Text('Backup codes copied')),
               );
             },
-            child: const Text('Copy'),
+            icon: const Icon(Icons.copy_rounded),
+            label: const Text('Copy'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(),

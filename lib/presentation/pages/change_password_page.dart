@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../domain/usecases/account_usecases.dart';
 import '../state/account_scope.dart';
+import '../widgets/app_button.dart';
+import '../widgets/app_card.dart';
+import '../widgets/app_text_field.dart';
 import '../widgets/recovery_key_dialog.dart';
 
 class ChangePasswordPage extends StatefulWidget {
@@ -94,96 +97,97 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Change Master Password')),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          TextField(
-            controller: _currentPasswordController,
-            obscureText: _isCurrentPasswordObscured,
-            decoration: InputDecoration(
-              labelText: 'Current Password',
-              suffixIcon: IconButton(
-                onPressed: () {
-                  setState(() {
-                    _isCurrentPasswordObscured = !_isCurrentPasswordObscured;
-                  });
-                },
-                icon: Icon(
-                  _isCurrentPasswordObscured
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 620),
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                AppCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Security Settings',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Updating your master password rotates the recovery key. Save the new one offline after update.',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 18),
+                      AppTextField(
+                        controller: _currentPasswordController,
+                        label: 'Current Password',
+                        obscureText: _isCurrentPasswordObscured,
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _isCurrentPasswordObscured =
+                                  !_isCurrentPasswordObscured;
+                            });
+                          },
+                          icon: Icon(
+                            _isCurrentPasswordObscured
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      AppTextField(
+                        controller: _newPasswordController,
+                        label: 'New Password',
+                        obscureText: _isNewPasswordObscured,
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _isNewPasswordObscured = !_isNewPasswordObscured;
+                            });
+                          },
+                          icon: Icon(
+                            _isNewPasswordObscured
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      AppTextField(
+                        controller: _confirmPasswordController,
+                        label: 'Confirm New Password',
+                        obscureText: _isConfirmPasswordObscured,
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _isConfirmPasswordObscured =
+                                  !_isConfirmPasswordObscured;
+                            });
+                          },
+                          icon: Icon(
+                            _isConfirmPasswordObscured
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      AppButton(
+                        label: _isSubmitting ? 'Updating...' : 'Change Password',
+                        onPressed: _isSubmitting ? null : _changePassword,
+                        isLoading: _isSubmitting,
+                        leading: const Icon(Icons.security_update_good_outlined),
+                      ),
+                    ],
+                  ),
                 ),
-                tooltip: _isCurrentPasswordObscured
-                    ? 'Show password'
-                    : 'Hide password',
-              ),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _newPasswordController,
-            obscureText: _isNewPasswordObscured,
-            decoration: InputDecoration(
-              labelText: 'New Password',
-              suffixIcon: IconButton(
-                onPressed: () {
-                  setState(() {
-                    _isNewPasswordObscured = !_isNewPasswordObscured;
-                  });
-                },
-                icon: Icon(
-                  _isNewPasswordObscured
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                ),
-                tooltip: _isNewPasswordObscured
-                    ? 'Show password'
-                    : 'Hide password',
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _confirmPasswordController,
-            obscureText: _isConfirmPasswordObscured,
-            decoration: InputDecoration(
-              labelText: 'Confirm New Password',
-              suffixIcon: IconButton(
-                onPressed: () {
-                  setState(() {
-                    _isConfirmPasswordObscured = !_isConfirmPasswordObscured;
-                  });
-                },
-                icon: Icon(
-                  _isConfirmPasswordObscured
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                ),
-                tooltip: _isConfirmPasswordObscured
-                    ? 'Show password'
-                    : 'Hide password',
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Changing the master password rotates the recovery key. Save the new key offline after the update completes.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: _isSubmitting ? null : _changePassword,
-            child: Text(_isSubmitting ? 'Updating...' : 'Change Password'),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
-
-

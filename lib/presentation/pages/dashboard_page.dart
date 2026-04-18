@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../domain/models/vault.dart';
 import '../state/account_scope.dart';
-import '../widgets/password_card.dart';
+import '../theme/app_theme.dart';
+import '../widgets/animated_stat_card.dart';
+import '../widgets/empty_state_widget.dart';
+import '../widgets/password_tile.dart';
+import '../widgets/status_badge.dart';
+import '../widgets/vault_background.dart';
+import '../widgets/app_text_field.dart';
 import 'add_password_page.dart';
-import 'change_password_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -15,13 +20,11 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int? _deletingIndex;
-  final TextEditingController _deleteAccountPasswordController =
-      TextEditingController();
-  bool _isDeleteAccountPasswordObscured = true;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void dispose() {
-    _deleteAccountPasswordController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -30,123 +33,6 @@ class _DashboardPageState extends State<DashboardPage> {
       context,
       MaterialPageRoute(builder: (_) => const AddPasswordPage()),
     );
-  }
-
-  Future<void> _openChangePasswordPage() async {
-    await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(builder: (_) => const ChangePasswordPage()),
-    );
-  }
-
-  Future<void> _logout() async {
-    final controller = AccountScope.of(context);
-    try {
-      await controller.logout();
-      if (!mounted) {
-        return;
-      }
-
-      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-    } catch (_) {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to log out right now.')),
-      );
-    }
-  }
-
-  Future<void> _openAccountMenu() async {
-    final controller = AccountScope.of(context);
-    await showModalBottomSheet<void>(
-      context: context,
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.admin_panel_settings_outlined),
-                title: const Text('Change Master Password'),
-                onTap: controller.isBusy
-                    ? null
-                    : () {
-                        Navigator.pop(sheetContext);
-                        _openChangePasswordPage();
-                      },
-              ),
-              ListTile(
-                leading: const Icon(Icons.fingerprint_outlined),
-                title: const Text('Biometric Login 2FA'),
-                subtitle: Text(
-                  controller.isBiometricSecondFactorAvailable
-                      ? 'Require biometrics after password sign in'
-                      : 'Biometrics unavailable on this device',
-                ),
-                trailing: Switch(
-                  value: controller.isBiometricSecondFactorEnabled,
-                  onChanged: controller.isBusy ||
-                          (!controller.isBiometricSecondFactorAvailable &&
-                              !controller.isBiometricSecondFactorEnabled)
-                      ? null
-                      : (enabled) {
-                          Navigator.pop(sheetContext);
-                          _setBiometricSecondFactor(enabled);
-                        },
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.logout_rounded),
-                title: const Text('Logout'),
-                onTap: controller.isBusy
-                    ? null
-                    : () {
-                        Navigator.pop(sheetContext);
-                        _logout();
-                      },
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete_forever_outlined),
-                title: const Text('Delete Master Account'),
-                textColor: Theme.of(context).colorScheme.error,
-                iconColor: Theme.of(context).colorScheme.error,
-                onTap: controller.isBusy
-                    ? null
-                    : () {
-                        Navigator.pop(sheetContext);
-                        _deleteMasterAccount();
-                      },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _setBiometricSecondFactor(bool enabled) async {
-    final controller = AccountScope.of(context);
-    try {
-      await controller.setBiometricSecondFactorEnabled(enabled);
-      if (!mounted) {
-        return;
-      }
-
-      final message = enabled
-          ? 'Biometric second-factor is enabled.'
-          : 'Biometric second-factor is disabled.';
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-    } on Exception {
-      if (!mounted) {
-        return;
-      }
-
-      final message =
-          controller.errorMessage ?? 'Could not update biometric second-factor.';
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-    }
   }
 
   Future<void> _deleteCredential(int index) async {
@@ -167,6 +53,7 @@ class _DashboardPageState extends State<DashboardPage> {
               child: const Text('Cancel'),
             ),
             FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: AppColors.danger),
               onPressed: () => Navigator.pop(context, true),
               child: const Text('Delete'),
             ),
@@ -219,173 +106,204 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  Future<void> _deleteMasterAccount() async {
-    final controller = AccountScope.of(context);
-    final activeAccount = controller.activeAccount;
-    if (activeAccount == null) {
-      return;
-    }
-
-    _deleteAccountPasswordController.clear();
-    _isDeleteAccountPasswordObscured = true;
-
-    final password = await showDialog<String>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: const Text('Delete Master Account'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'This permanently deletes ${activeAccount.username} and destroys every credential stored inside this vault.',
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _deleteAccountPasswordController,
-                      obscureText: _isDeleteAccountPasswordObscured,
-                      decoration: InputDecoration(
-                        labelText: 'Master Password',
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            setDialogState(() {
-                              _isDeleteAccountPasswordObscured =
-                                  !_isDeleteAccountPasswordObscured;
-                            });
-                          },
-                          icon: Icon(
-                            _isDeleteAccountPasswordObscured
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                          ),
-                          tooltip: _isDeleteAccountPasswordObscured
-                              ? 'Show password'
-                              : 'Hide password',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(
-                    context,
-                    _deleteAccountPasswordController.text,
-                  ),
-                  child: const Text('Delete Account'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    if (!mounted || password == null) {
-      return;
-    }
-
-    try {
-      final messenger = ScaffoldMessenger.of(context);
-      await controller.deleteSavedAccount(
-        accountId: activeAccount.id,
-        password: password,
-      );
-      await controller.logout();
-
-      if (!mounted) {
-        return;
-      }
-
-      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Master account deleted.')),
-      );
-    } on Exception {
-      if (!mounted) {
-        return;
-      }
-
-      final message =
-          controller.errorMessage ?? 'Could not delete master account.';
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final controller = AccountScope.of(context);
 
     if (!controller.isAuthenticated) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Vault')),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Sign in from the home page to access your vault.'),
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/home',
-                      (route) => false,
-                    );
-                  },
-                  child: const Text('Back to Home'),
-                ),
-              ],
-            ),
-          ),
+        appBar: AppBar(title: const Text('VaultX')),
+        body: EmptyStateWidget(
+          title: 'Session Locked',
+          subtitle: 'Sign in from the home page to access your vault.',
+          icon: Icons.lock_outline_rounded,
+          actionLabel: 'Back to Home',
+          onAction: () {
+            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+          },
         ),
       );
     }
 
     final vault = controller.currentVault;
-    final username = controller.activeAccount?.username ?? 'Unknown';
+    final username = controller.activeAccount?.username ?? 'User';
+    final query = _searchController.text.trim().toLowerCase();
+    final filteredEntries = query.isEmpty
+        ? vault.entries
+        : vault.entries.where((entry) {
+            final app = entry['app']?.toString().toLowerCase() ?? '';
+            final user = entry['username']?.toString().toLowerCase() ?? '';
+            final email = entry['email']?.toString().toLowerCase() ?? '';
+            return app.contains(query) || user.contains(query) || email.contains(query);
+          }).toList();
+
+    final secureScore = vault.entries.isEmpty
+        ? 100
+        : ((vault.entries.where((entry) {
+              final password = entry['password']?.toString() ?? '';
+              return password.length >= 12;
+            }).length /
+                    vault.entries.length) *
+                100)
+            .round();
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: controller.isBusy ? null : _openAccountMenu,
-          icon: const Icon(Icons.menu),
-          tooltip: 'Account options',
-        ),
-        title: Text('Vault: $username'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: controller.isBusy ? null : _openAddPasswordPage,
-        child: const Icon(Icons.add),
-      ),
-      body: vault.entries.isEmpty
-          ? const Center(child: Text('No passwords saved yet'))
-          : ListView.builder(
-              itemCount: vault.entries.length,
-              itemBuilder: (_, i) {
-                final entry = vault.entries[i];
-                return PasswordCard(
-                  entry,
-                  onDelete: () => _deleteCredential(i),
-                  isDeleting: _deletingIndex == i,
-                );
-              },
+      floatingActionButton: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accentCyan.withValues(alpha: 0.45),
+              blurRadius: 24,
             ),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: controller.isBusy ? null : _openAddPasswordPage,
+          child: const Icon(Icons.add_rounded),
+        ),
+      ),
+      body: VaultBackground(
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 980),
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+                    sliver: SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Hello, $username',
+                                      style: Theme.of(context).textTheme.headlineMedium,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Your vault is encrypted and protected.',
+                                      style: Theme.of(context).textTheme.bodyMedium,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SecurityBadge(
+                                label: 'Security Score High',
+                                icon: Icons.shield_outlined,
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/security-center');
+                                },
+                                icon: const Icon(Icons.tune_rounded),
+                                tooltip: 'Security Center',
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          VaultTextField(
+                            controller: _searchController,
+                            label: 'Search credentials',
+                            hint: 'app, email, username',
+                            suffixIcon: const Icon(Icons.search_rounded),
+                          ),
+                          const SizedBox(height: 14),
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: [
+                              AnimatedStatCard(
+                                title: 'Total Passwords',
+                                value: '${vault.entries.length}',
+                                icon: Icons.lock_outline_rounded,
+                                delayMs: 40,
+                              ),
+                              const AnimatedStatCard(
+                                title: 'Trusted Devices',
+                                value: '1',
+                                icon: Icons.verified_user_outlined,
+                                accent: AppColors.accentCyan,
+                                delayMs: 80,
+                              ),
+                              const AnimatedStatCard(
+                                title: 'Recovery Status',
+                                value: 'Ready',
+                                icon: Icons.key_outlined,
+                                accent: AppColors.accentGreen,
+                                delayMs: 120,
+                              ),
+                              AnimatedStatCard(
+                                title: 'Vault Strength',
+                                value: '$secureScore%',
+                                icon: Icons.bolt_outlined,
+                                accent: AppColors.primary,
+                                delayMs: 160,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (controller.isBusy)
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      sliver: SliverList.builder(
+                        itemCount: 3,
+                        itemBuilder: (_, i) {
+                          return Container(
+                            height: 84,
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: BoxDecoration(
+                              color: AppColors.cardSurface,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  else if (filteredEntries.isEmpty)
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: EmptyStateWidget(
+                        title: 'No credentials yet',
+                        subtitle:
+                            'Add your first app login to start building your secure vault.',
+                        icon: Icons.lock_person_outlined,
+                      ),
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                      sliver: SliverList.builder(
+                        itemCount: filteredEntries.length,
+                        itemBuilder: (_, i) {
+                          final entry = filteredEntries[i];
+                          final originalIndex = vault.entries.indexOf(entry);
+                          return PasswordTilePremium(
+                            entry: entry,
+                            onDelete: () => _deleteCredential(originalIndex),
+                            isDeleting: _deletingIndex == originalIndex,
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
-
-

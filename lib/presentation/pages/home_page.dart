@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/usecases/account_usecases.dart';
-import 'recovery_page.dart';
 import '../state/account_scope.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_button.dart';
+import '../widgets/app_card.dart';
+import '../widgets/app_text_field.dart';
+import '../widgets/status_badge.dart';
+import '../widgets/vault_background.dart';
+import 'recovery_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -79,90 +85,159 @@ class _HomePageState extends State<HomePage> {
     final controller = AccountScope.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('VaultX')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: ListView(
-            padding: const EdgeInsets.all(24),
-            shrinkWrap: true,
-            children: [
-              Text(
-                'Welcome Back',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Sign in to access your encrypted vault. Successful sign-ins automatically trust this device for future recovery.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 24),
-              if (controller.errorMessage != null) ...[
-                Card(
-                  color: Colors.red.withValues(alpha: 0.18),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(controller.errorMessage!),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-              TextField(
-                controller: _usernameController,
-                decoration: const InputDecoration(
-                  labelText: 'Email or Username',
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _passwordController,
-                obscureText: _isPasswordObscured,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordObscured = !_isPasswordObscured;
-                      });
+      body: VaultBackground(
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 470),
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 28),
+                children: [
+                  const SizedBox(height: 12),
+                  TweenAnimationBuilder<double>(
+                    duration: const Duration(milliseconds: 700),
+                    tween: Tween(begin: 0, end: 1),
+                    builder: (context, value, child) {
+                      return Opacity(
+                        opacity: value,
+                        child: Transform.translate(
+                          offset: Offset(0, (1 - value) * 20),
+                          child: child,
+                        ),
+                      );
                     },
-                    icon: Icon(
-                      _isPasswordObscured
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
+                    child: Column(
+                      children: [
+                        Hero(
+                          tag: 'vault-logo',
+                          child: Container(
+                            width: 86,
+                            height: 86,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: const LinearGradient(
+                                colors: [AppColors.primary, AppColors.accentCyan],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withValues(alpha: 0.5),
+                                  blurRadius: 32,
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.shield_outlined,
+                              color: Colors.white,
+                              size: 42,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        Text('VaultX', style: Theme.of(context).textTheme.headlineLarge),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Next-Gen Password Security',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
                     ),
-                    tooltip: _isPasswordObscured
-                        ? 'Show password'
-                        : 'Hide password',
                   ),
-                ),
+                  const SizedBox(height: 24),
+                  GlassCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Unlock Vault',
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            const SecurityBadge(
+                              label: 'Encrypted',
+                              icon: Icons.verified_user_outlined,
+                              color: AppColors.accentGreen,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Securely access your vault with your master credentials.',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 18),
+                        if (controller.errorMessage != null) ...[
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              color: AppColors.danger.withValues(alpha: 0.12),
+                              border: Border.all(
+                                color: AppColors.danger.withValues(alpha: 0.34),
+                              ),
+                            ),
+                            child: Text(
+                              controller.errorMessage!,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                        ],
+                        VaultTextField(
+                          controller: _usernameController,
+                          label: 'Email or Username',
+                          hint: 'you@company.com',
+                        ),
+                        const SizedBox(height: 12),
+                        VaultTextField(
+                          controller: _passwordController,
+                          label: 'Password',
+                          obscureText: _isPasswordObscured,
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordObscured = !_isPasswordObscured;
+                              });
+                            },
+                            icon: Icon(
+                              _isPasswordObscured
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                            ),
+                            tooltip: _isPasswordObscured
+                                ? 'Show password'
+                                : 'Hide password',
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        GlowButton(
+                          label: controller.isBusy ? 'Signing In...' : 'Unlock Vault',
+                          onPressed: controller.isBusy ? null : _unlockVault,
+                          isLoading: controller.isBusy,
+                          leading: const Icon(Icons.lock_open_rounded),
+                        ),
+                        const SizedBox(height: 10),
+                        TextButton(
+                          onPressed: controller.isBusy ? null : _openRecoveryFlow,
+                          child: const Text('Forgot Password?'),
+                        ),
+                        const SizedBox(height: 4),
+                        GlowButton(
+                          label: 'Create Account',
+                          onPressed: controller.isBusy ? null : _openRegisterPage,
+                          style: AppButtonStyle.ghost,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              FilledButton(
-                onPressed: controller.isBusy ? null : _unlockVault,
-                child: Text(controller.isBusy ? 'Signing In...' : 'Login'),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: controller.isBusy ? null : _openRecoveryFlow,
-                child: const Text('Forgot password? Recover with recovery key'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: controller.isBusy ? null : _openRegisterPage,
-                child: const Text('Create New Account'),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: null,
-                icon: const Icon(Icons.switch_account_outlined),
-                label: const Text('Switch Account (Coming Soon)'),
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-
-

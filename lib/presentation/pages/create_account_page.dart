@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../domain/usecases/account_usecases.dart';
 import '../state/account_scope.dart';
+import '../widgets/app_button.dart';
+import '../widgets/app_card.dart';
+import '../widgets/app_text_field.dart';
 import '../widgets/recovery_key_dialog.dart';
 
 class CreateAccountPage extends StatefulWidget {
@@ -99,86 +102,90 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Create Master Account')),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          TextField(
-            controller: _usernameController,
-            decoration: const InputDecoration(labelText: 'Email or Username'),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _tokenController,
-            decoration: const InputDecoration(
-              labelText: 'Token or API Key (Optional)',
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _passwordController,
-            obscureText: _isPasswordObscured,
-            decoration: InputDecoration(
-              labelText: 'Password',
-              helperText: 'Use 8+ chars with uppercase, lowercase, and number.',
-              suffixIcon: IconButton(
-                onPressed: () {
-                  setState(() {
-                    _isPasswordObscured = !_isPasswordObscured;
-                  });
-                },
-                icon: Icon(
-                  _isPasswordObscured
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 620),
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                AppCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Set Up VaultX',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Create your master account. A recovery key is shown once and stored only as a hash.',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 18),
+                      AppTextField(
+                        controller: _usernameController,
+                        label: 'Email or Username',
+                      ),
+                      const SizedBox(height: 12),
+                      AppTextField(
+                        controller: _tokenController,
+                        label: 'Token or API Key (Optional)',
+                      ),
+                      const SizedBox(height: 12),
+                      AppTextField(
+                        controller: _passwordController,
+                        label: 'Password',
+                        helperText:
+                            'Use 8+ chars with uppercase, lowercase, and number.',
+                        obscureText: _isPasswordObscured,
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordObscured = !_isPasswordObscured;
+                            });
+                          },
+                          icon: Icon(
+                            _isPasswordObscured
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      AppTextField(
+                        controller: _confirmPasswordController,
+                        label: 'Confirm Password',
+                        obscureText: _isConfirmPasswordObscured,
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _isConfirmPasswordObscured =
+                                  !_isConfirmPasswordObscured;
+                            });
+                          },
+                          icon: Icon(
+                            _isConfirmPasswordObscured
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      AppButton(
+                        label: _isSubmitting ? 'Creating...' : 'Create Account',
+                        onPressed: _isSubmitting ? null : _createAccount,
+                        isLoading: _isSubmitting,
+                        leading: const Icon(Icons.person_add_alt_1_rounded),
+                      ),
+                    ],
+                  ),
                 ),
-                tooltip: _isPasswordObscured
-                    ? 'Show password'
-                    : 'Hide password',
-              ),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _confirmPasswordController,
-            obscureText: _isConfirmPasswordObscured,
-            decoration: InputDecoration(
-              labelText: 'Confirm Password',
-              suffixIcon: IconButton(
-                onPressed: () {
-                  setState(() {
-                    _isConfirmPasswordObscured = !_isConfirmPasswordObscured;
-                  });
-                },
-                icon: Icon(
-                  _isConfirmPasswordObscured
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                ),
-                tooltip: _isConfirmPasswordObscured
-                    ? 'Show password'
-                    : 'Hide password',
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'VaultX will generate a one-time recovery key after account creation. Save it offline because the app stores only a salted hash.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: _isSubmitting ? null : _createAccount,
-            child: Text(_isSubmitting ? 'Adding...' : 'Add Account'),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
-
-

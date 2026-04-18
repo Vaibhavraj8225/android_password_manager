@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/app_theme.dart';
+
 Future<void> showRecoveryKeyDialog(
   BuildContext context, {
   required String recoveryKey,
@@ -26,19 +28,28 @@ Future<void> showRecoveryKeyDialog(
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              SelectableText(
-                recoveryKey,
-                style: const TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: SelectableText(
+                  recoveryKey,
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
           ),
         ),
         actions: [
-          TextButton(
+          TextButton.icon(
             onPressed: () async {
               await Clipboard.setData(ClipboardData(text: recoveryKey));
 
@@ -50,7 +61,8 @@ Future<void> showRecoveryKeyDialog(
                 const SnackBar(content: Text('Recovery key copied')),
               );
             },
-            child: const Text('Copy'),
+            icon: const Icon(Icons.copy_rounded),
+            label: const Text('Copy'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(),
