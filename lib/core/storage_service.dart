@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'app_secure_storage.dart';
 
@@ -28,3 +28,4 @@ class StorageService {
 
   String _vaultKey(String masterId) => 'vault_$masterId';
 }
+

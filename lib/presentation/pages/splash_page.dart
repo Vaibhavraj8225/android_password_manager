@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 
@@ -79,7 +79,7 @@ class _SplashPageState extends State<SplashPage> {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  Text('VaultX', style: Theme.of(context).textTheme.headlineLarge),
+                  Text('Veylox', style: Theme.of(context).textTheme.headlineLarge),
                   const SizedBox(height: 8),
                   Text(
                     'Secure Password Intelligence',
@@ -100,3 +100,4 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 }
+

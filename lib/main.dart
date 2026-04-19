@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'app.dart';
 import 'core/app_secure_storage.dart';
@@ -19,6 +19,8 @@ import 'domain/usecases/recovery_usecases.dart';
 import 'presentation/state/account_controller.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   final secureStorage = AppSecureStorage();
   final storageService = StorageService(secureStorage);
   final biometricSecondFactorService = BiometricSecondFactorService(
@@ -46,7 +48,7 @@ void main() {
   );
 
   runApp(
-    VaultXApp(
+    VeyloxApp(
       accountController: AccountController(
         getAccounts: GetAccounts(accountRepository),
         getActiveAccount: GetActiveAccount(accountRepository),
@@ -83,5 +85,6 @@ void main() {
     ),
   );
 }
+
 
 

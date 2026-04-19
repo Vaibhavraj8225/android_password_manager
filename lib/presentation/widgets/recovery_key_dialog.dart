@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_theme.dart';
@@ -20,7 +20,7 @@ Future<void> showRecoveryKeyDialog(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Store this recovery key offline. VaultX only keeps a hashed copy, so it cannot be shown again later.',
+                'Store this recovery key offline. Veylox only keeps a hashed copy, so it cannot be shown again later.',
               ),
               const SizedBox(height: 12),
               const Text(
@@ -73,3 +73,4 @@ Future<void> showRecoveryKeyDialog(
     },
   );
 }
+

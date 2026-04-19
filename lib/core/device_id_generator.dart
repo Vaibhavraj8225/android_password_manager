@@ -1,4 +1,4 @@
-import 'secure_random_generator.dart';
+﻿import 'secure_random_generator.dart';
 
 class DeviceIdGenerator {
   DeviceIdGenerator(this._randomGenerator);
@@ -23,3 +23,4 @@ class DeviceIdGenerator {
     ].join('-');
   }
 }
+

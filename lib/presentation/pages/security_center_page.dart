@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../state/account_scope.dart';
 import '../theme/app_theme.dart';
@@ -315,3 +315,4 @@ class _Tile extends StatelessWidget {
     );
   }
 }
+

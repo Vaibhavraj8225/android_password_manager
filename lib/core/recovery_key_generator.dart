@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'hashing_utility.dart';
 import 'secure_random_generator.dart';
@@ -40,3 +40,4 @@ class GeneratedRecoveryKey {
   final String salt;
   final String hash;
 }
+

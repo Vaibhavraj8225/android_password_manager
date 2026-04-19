@@ -1,4 +1,4 @@
-class Vault {
+﻿class Vault {
   List<Map<String, dynamic>> entries;
   List<Map<String, dynamic>> notes;
 
@@ -17,5 +17,6 @@ class Vault {
 
   Map<String, dynamic> toJson() => {"entries": entries, "secure_notes": notes};
 }
+
 
 

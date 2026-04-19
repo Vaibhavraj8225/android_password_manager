@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
 
@@ -27,3 +27,4 @@ class HashingUtility {
     return result == 0;
   }
 }
+

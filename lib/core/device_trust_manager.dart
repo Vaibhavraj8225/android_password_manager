@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
 
@@ -110,3 +110,4 @@ class DeviceTrustManager {
 
   String _trustedDeviceKey(String accountId) => 'trusted_device_$accountId';
 }
+

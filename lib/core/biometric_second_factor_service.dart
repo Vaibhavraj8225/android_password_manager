@@ -1,4 +1,4 @@
-import 'package:local_auth/local_auth.dart';
+﻿import 'package:local_auth/local_auth.dart';
 
 import 'app_secure_storage.dart';
 
@@ -65,3 +65,4 @@ class BiometricSecondFactorService {
 
   String _enabledKey(String accountId) => 'biometric_2fa_$accountId';
 }
+

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../domain/usecases/account_usecases.dart';
 import '../state/account_scope.dart';
@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         const SizedBox(height: 18),
-                        Text('VaultX', style: Theme.of(context).textTheme.headlineLarge),
+                        Text('Veylox', style: Theme.of(context).textTheme.headlineLarge),
                         const SizedBox(height: 6),
                         Text(
                           'Next-Gen Password Security',
@@ -241,3 +241,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+

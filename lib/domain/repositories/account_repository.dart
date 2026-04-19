@@ -1,4 +1,4 @@
-import '../entities/account_entity.dart';
+﻿import '../entities/account_entity.dart';
 
 abstract class AccountRepository {
   Future<List<AccountEntity>> getAccounts();
@@ -26,5 +26,6 @@ abstract class AccountRepository {
     required DateTime now,
   });
 }
+
 
 

@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import '../../core/device_trust_manager.dart';
 import '../../core/hashing_utility.dart';
@@ -270,3 +270,4 @@ class CompletedRecoveryResult {
   final String username;
   final DateTime expiresAt;
 }
+

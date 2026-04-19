@@ -9,7 +9,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: PasswordCard(const {
-            'app': 'VaultX',
+            'app': 'Veylox',
             'username': 'rookie@example.com',
             'password': 'Secret123',
           }, onDelete: () {}),
@@ -17,7 +17,7 @@ void main() {
       ),
     );
 
-    expect(find.text('VaultX'), findsOneWidget);
+    expect(find.text('Veylox'), findsOneWidget);
     expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
   });
 }

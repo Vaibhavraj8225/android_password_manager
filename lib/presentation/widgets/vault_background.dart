@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
@@ -59,3 +59,4 @@ class _GlowOrb extends StatelessWidget {
     );
   }
 }
+

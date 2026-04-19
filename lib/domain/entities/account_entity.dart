@@ -1,4 +1,4 @@
-class AccountEntity {
+﻿class AccountEntity {
   const AccountEntity({
     required this.id,
     required this.username,
@@ -115,5 +115,6 @@ class RecoveryRequestEntity {
     );
   }
 }
+
 
 

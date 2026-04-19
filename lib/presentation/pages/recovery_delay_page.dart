@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 
@@ -184,7 +184,7 @@ class _RecoveryDelayPageState extends State<RecoveryDelayPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'New device detected. Security hold active. VaultX enforces a 24-hour delay to protect your account.',
+                        'New device detected. Security hold active. Veylox enforces a 24-hour delay to protect your account.',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 18),
@@ -288,3 +288,4 @@ class _StepDot extends StatelessWidget {
     );
   }
 }
+

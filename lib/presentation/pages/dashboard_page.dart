@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../domain/models/vault.dart';
 import '../state/account_scope.dart';
@@ -124,7 +124,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
     if (!controller.isAuthenticated) {
       return Scaffold(
-        appBar: AppBar(title: const Text('VaultX')),
+        appBar: AppBar(title: const Text('Veylox')),
         body: EmptyStateWidget(
           title: 'Session Locked',
           subtitle: 'Sign in from the home page to access your vault.',
@@ -320,3 +320,4 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 }
+

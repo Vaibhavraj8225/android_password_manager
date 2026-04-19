@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 
 class SecureRandomGenerator {
   SecureRandomGenerator() : _random = Random.secure();
@@ -24,3 +24,4 @@ class SecureRandomGenerator {
     return segments.join('-');
   }
 }
+

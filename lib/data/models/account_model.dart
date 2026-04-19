@@ -1,4 +1,4 @@
-import '../../domain/entities/account_entity.dart';
+﻿import '../../domain/entities/account_entity.dart';
 
 class AccountModel extends AccountEntity {
   const AccountModel({
@@ -117,5 +117,6 @@ class RecoveryRequestModel extends RecoveryRequestEntity {
     'authorization_expires_at': authorizationExpiresAt?.toIso8601String(),
   };
 }
+
 
 

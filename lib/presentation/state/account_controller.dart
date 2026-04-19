@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -491,3 +491,4 @@ class AccountController extends ChangeNotifier {
     notifyListeners();
   }
 }
+

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../domain/usecases/account_usecases.dart';
 import '../../domain/usecases/recovery_usecases.dart';
@@ -202,3 +202,4 @@ class _StepDot extends StatelessWidget {
     );
   }
 }
+

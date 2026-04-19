@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:math';
 import 'package:cryptography/cryptography.dart';
 
@@ -36,5 +36,6 @@ class CryptoService {
     return List.generate(length, (_) => rnd.nextInt(256));
   }
 }
+
 
 

@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+﻿import 'package:flutter/widgets.dart';
 
 import 'account_controller.dart';
 
@@ -15,3 +15,4 @@ class AccountScope extends InheritedNotifier<AccountController> {
     return scope!.notifier!;
   }
 }
+

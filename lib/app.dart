@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'presentation/pages/create_account_page.dart';
 import 'presentation/pages/dashboard_page.dart';
@@ -9,21 +9,25 @@ import 'presentation/pages/recovery_page.dart';
 import 'presentation/pages/reset_password_page.dart';
 import 'presentation/pages/security_center_page.dart';
 import 'presentation/pages/splash_page.dart';
+import 'presentation/security/app_lifecycle_handler.dart';
 import 'presentation/state/account_controller.dart';
 import 'presentation/state/account_scope.dart';
 import 'presentation/theme/app_theme.dart';
 
-class VaultXApp extends StatelessWidget {
-  const VaultXApp({required this.accountController, super.key});
+class VeyloxApp extends StatelessWidget {
+  const VeyloxApp({required this.accountController, super.key});
 
   final AccountController accountController;
+  static final GlobalKey<NavigatorState> _rootNavigatorKey =
+      GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
     return AccountScope(
       controller: accountController,
       child: MaterialApp(
-        title: 'VaultX',
+        navigatorKey: _rootNavigatorKey,
+        title: 'Veylox',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark(),
         initialRoute: '/splash',
@@ -38,7 +42,15 @@ class VaultXApp extends StatelessWidget {
           '/dashboard': (context) => const DashboardPage(),
           '/security-center': (context) => const SecurityCenterPage(),
         },
+        builder: (context, child) {
+          return AppLifecycleHandler(
+            controller: accountController,
+            navigatorKey: _rootNavigatorKey,
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
       ),
     );
   }
 }
+

@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 import '../../core/key_derivation.dart';
 import '../../core/recovery_key_generator.dart';
@@ -421,5 +421,6 @@ class AccountException implements Exception {
 
   final String message;
 }
+
 
 

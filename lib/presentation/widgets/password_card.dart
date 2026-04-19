@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'password_tile.dart';
 
@@ -26,3 +26,4 @@ class PasswordCard extends StatelessWidget {
     );
   }
 }
+

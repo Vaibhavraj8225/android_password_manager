@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -235,3 +235,4 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
     );
   }
 }
+

@@ -1,4 +1,4 @@
-import 'package:cryptography/cryptography.dart';
+﻿import 'package:cryptography/cryptography.dart';
 
 class KeyDerivation {
   final pbkdf2 = Pbkdf2(
@@ -15,5 +15,6 @@ class KeyDerivation {
     return key.extractBytes();
   }
 }
+
 
 

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../domain/usecases/account_usecases.dart';
 import '../state/account_scope.dart';
@@ -19,7 +19,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  final TextEditingController _tokenController = TextEditingController();
   bool _isSubmitting = false;
   bool _isPasswordObscured = true;
   bool _isConfirmPasswordObscured = true;
@@ -29,7 +28,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     _usernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _tokenController.dispose();
     super.dispose();
   }
 
@@ -53,7 +51,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       final recoveryKey = await AccountScope.of(context).createAccount(
         username: username,
         password: password,
-        authToken: _tokenController.text,
       );
 
       if (!mounted) {
@@ -114,7 +111,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Set Up VaultX',
+                        'Set Up Veylox',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 8),
@@ -126,11 +123,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       AppTextField(
                         controller: _usernameController,
                         label: 'Email or Username',
-                      ),
-                      const SizedBox(height: 12),
-                      AppTextField(
-                        controller: _tokenController,
-                        label: 'Token or API Key (Optional)',
                       ),
                       const SizedBox(height: 12),
                       AppTextField(
@@ -189,3 +181,4 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     );
   }
 }
+
