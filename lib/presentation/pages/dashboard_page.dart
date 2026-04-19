@@ -35,6 +35,18 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
+  Future<void> _openEditPasswordPage(int index, Map<String, dynamic> entry) async {
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddPasswordPage(
+          initialEntry: entry,
+          entryIndex: index,
+        ),
+      ),
+    );
+  }
+
   Future<void> _deleteCredential(int index) async {
     final controller = AccountScope.of(context);
     final entry = controller.currentVault.entries[index];
@@ -292,6 +304,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           final originalIndex = vault.entries.indexOf(entry);
                           return PasswordTilePremium(
                             entry: entry,
+                            onEdit: () => _openEditPasswordPage(originalIndex, entry),
                             onDelete: () => _deleteCredential(originalIndex),
                             isDeleting: _deletingIndex == originalIndex,
                           );

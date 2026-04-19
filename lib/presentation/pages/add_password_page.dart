@@ -10,7 +10,10 @@ import '../widgets/app_card.dart';
 import '../widgets/app_text_field.dart';
 
 class AddPasswordPage extends StatefulWidget {
-  const AddPasswordPage({super.key});
+  const AddPasswordPage({super.key, this.initialEntry, this.entryIndex});
+
+  final Map<String, dynamic>? initialEntry;
+  final int? entryIndex;
 
   @override
   State<AddPasswordPage> createState() => _AddPasswordPageState();
@@ -23,6 +26,20 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isSaving = false;
   bool _isPasswordObscured = true;
+  bool get _isEditing => widget.initialEntry != null && widget.entryIndex != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final initialEntry = widget.initialEntry;
+    if (initialEntry == null) {
+      return;
+    }
+    _appController.text = initialEntry['app']?.toString() ?? '';
+    _emailController.text = initialEntry['email']?.toString() ?? '';
+    _usernameController.text = initialEntry['username']?.toString() ?? '';
+    _passwordController.text = initialEntry['password']?.toString() ?? '';
+  }
 
   @override
   void dispose() {
@@ -58,13 +75,30 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
     });
 
     final controller = AccountScope.of(context);
-    final updatedEntries =
-        List<Map<String, dynamic>>.from(controller.currentVault.entries)..add({
-          'app': app,
-          'email': email,
-          'username': username,
-          'password': password,
+    final updatedEntries = List<Map<String, dynamic>>.from(
+      controller.currentVault.entries,
+    );
+    final credential = <String, dynamic>{
+      'app': app,
+      'email': email,
+      'username': username,
+      'password': password,
+    };
+    if (_isEditing) {
+      final entryIndex = widget.entryIndex!;
+      if (entryIndex < 0 || entryIndex >= updatedEntries.length) {
+        setState(() {
+          _isSaving = false;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not update credential.')),
+        );
+        return;
+      }
+      updatedEntries[entryIndex] = credential;
+    } else {
+      updatedEntries.add(credential);
+    }
 
     final updatedVault = Vault(
       entries: updatedEntries,
@@ -96,8 +130,12 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final pageTitle = _isEditing ? 'Edit Credential' : 'Add Credential';
+    final headerTitle = _isEditing ? 'Edit Credential' : 'Save New Password';
+    final saveLabel = _isEditing ? 'Update' : 'Save';
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Credential')),
+      appBar: AppBar(title: Text(pageTitle)),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -110,7 +148,7 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Save New Password',
+                        headerTitle,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 8),
@@ -168,7 +206,7 @@ class _AddPasswordPageState extends State<AddPasswordPage> {
                       ),
                       const SizedBox(height: 16),
                       AppButton(
-                        label: _isSaving ? 'Saving...' : 'Save',
+                        label: _isSaving ? 'Saving...' : saveLabel,
                         onPressed: _isSaving ? null : _save,
                         isLoading: _isSaving,
                         leading: const Icon(Icons.lock_outline_rounded),

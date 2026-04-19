@@ -8,12 +8,14 @@ class PasswordTilePremium extends StatelessWidget {
   const PasswordTilePremium({
     required this.entry,
     required this.onDelete,
+    this.onEdit,
     super.key,
     this.isDeleting = false,
   });
 
   final Map<String, dynamic> entry;
   final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
   final bool isDeleting;
 
   Future<void> _copyPassword(BuildContext context) async {
@@ -101,6 +103,15 @@ class PasswordTilePremium extends StatelessWidget {
                   child: const Text('Close'),
                 ),
                 FilledButton(
+                  onPressed: onEdit == null
+                      ? null
+                      : () {
+                          Navigator.pop(dialogContext);
+                          onEdit?.call();
+                        },
+                  child: const Text('Edit'),
+                ),
+                FilledButton(
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.danger,
                   ),
@@ -160,7 +171,7 @@ class PasswordTilePremium extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      password.isEmpty ? '' : '•' * (password.length.clamp(6, 14)),
+                      password.isEmpty ? '' : '*' * (password.length.clamp(6, 14)),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],
@@ -187,6 +198,7 @@ class PasswordTile extends PasswordTilePremium {
   const PasswordTile({
     required super.entry,
     required super.onDelete,
+    super.onEdit,
     super.key,
     super.isDeleting,
   });
