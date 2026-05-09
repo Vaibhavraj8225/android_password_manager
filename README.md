@@ -39,11 +39,14 @@ View Credentials:-
 <img width="720" height="1600" alt="Image" src="https://github.com/user-attachments/assets/0fb85acd-5cac-4fea-8f10-b02050b73e88" />
 <br><br>
 <br><br>
+Account Recovery:-
 <img width="720" height="1600" alt="Image" src="https://github.com/user-attachments/assets/953e35f7-743d-49f9-b901-8fb87cf9ad59" />
 <br><br>
 <br><br>
+Options Tab:-
 <img width="720" height="1600" alt="Image" src="https://github.com/user-attachments/assets/61e2457d-4209-4168-8921-e6128f889fb4" />
 <br><br>
 <br><br>
+Idle Screen lock/ Background lock
 <img width="1080" height="2400" alt="Image" src="https://github.com/user-attachments/assets/182a9cd9-a737-403b-81a7-ed3428df0c54" />
 
