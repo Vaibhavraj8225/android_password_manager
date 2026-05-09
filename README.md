@@ -17,8 +17,13 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference.
 
 App Screenshots:
+Login Screen:-
 <img width="720" height="1600" alt="Image" src="https://github.com/user-attachments/assets/0fe8eea3-0e2e-4136-8aee-31e4a5e33172" />
+
+Create Account:-
 <img width="720" height="1600" alt="Image" src="https://github.com/user-attachments/assets/6ce91dc7-e4e8-43d5-a8ef-50027cc56c06" />
+
+Dashboard:-
 <img width="720" height="1600" alt="Image" src="https://github.com/user-attachments/assets/52ab405d-1e17-49dd-9d64-e71d020b9e80" />
 <img width="720" height="1600" alt="Image" src="https://github.com/user-attachments/assets/5aeb36d1-3b6b-4a69-ae17-f6522fac7505" />
 <img width="720" height="1600" alt="Image" src="https://github.com/user-attachments/assets/0fb85acd-5cac-4fea-8f10-b02050b73e88" />
